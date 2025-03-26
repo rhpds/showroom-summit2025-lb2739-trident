@@ -1,0 +1,74 @@
+# Module 3: Provision workloads
+
+In this chapter, you will perform the following tasks:
+
+* Create a containerized workload with the _cli_
+* Create a Virtual Machine with the OpenShift Console
+
+[#deploywordpress]
+== Deploy the Wordpress Helm chart
+
+Wordpress is widely known as a blogging and content management platform. +
+Let's deploy it on the production cluster with the help of a Helm chart.
+
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+helm repo add bitnami https://charts.bitnami.com/bitnami
+
+helm install wordpress bitnami/wordpress --version 24.1.18 -n wordpress --create-namespace \
+  --set wordpressUsername=rosa \
+  --set wordpressPassword=Rosa12345 \
+  --set global.storageClass=storage-class-nfs \
+  --set wordpressBlogName="Best Blog Ever"
+----
+
+NOTE: It takes a tiny bit more than a minute for the installation to complete.
+
+Check the content of the `wordpress` namespace.
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+oc get -n wordpress svc,po,pvc
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+NAME                                 TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)                      AGE
+service/wordpress                    LoadBalancer   172.30.57.162    aa7ccfdb52de24e73867ae11c11bedc0-1849430877.us-east-2.elb.amazonaws.com   80:30087/TCP,443:32446/TCP   10m
+service/wordpress-mariadb            ClusterIP      172.30.248.149   <none>                                                                    3306/TCP                     10m
+service/wordpress-mariadb-headless   ClusterIP      None             <none>                                                                    3306/TCP                     10m
+
+NAME                             READY   STATUS    RESTARTS   AGE
+pod/wordpress-74d5d98bcc-5hnhz   1/1     Running   0          10m
+pod/wordpress-mariadb-0          1/1     Running   0          10m
+
+NAME                                             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS        VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/data-wordpress-mariadb-0   Bound    pvc-9b53fcd7-09a9-4ce8-9b8e-9b24c22cd3ee   8Gi        RWO            storage-class-nfs   <unset>                 10m
+persistentvolumeclaim/wordpress                  Bound    pvc-774a516b-2205-462f-bf5d-d4014e37c72b   10Gi       RWO            storage-class-nfs   <unset>                 10m
+----
+
+Notice the wordpress service ? +
+Copy & paste the address provided by the Load Balancer in your browser in order to access WordPress:
+image::Wordpress_HelloWorld.png[HelloWorld]
+
+Before protecting that application, you may want to create your own blog. +
+You first need to connect to the admin page (use the same URL as Wordpress followed by "/wp-admin"). +
+This will ask for credentials, which you set in the Helm chart (`rosa`/`Rosa12345`).
+
+Once logged in, you need to click on `Posts` in the left bar, and then press on the `Add New Post` button.
+image::Wordpress_Admin_AddNewPost.png[AddNewPost]
+
+Write Something nice or funny, and when ready press on the two successive `Publish` buttons. +
+In another window, connect to the main page of the Wordpress user site to visualize the result.
+image::Wordpress_Admin_FirstPost.png[FirstPost]
+
+Tadaaaa! Your first application is now ready.
+Let's look at Virtual Machines.
+
+[#deployvm]
+== Deploy a simple VM an iSCSI volume
+
+TBD
