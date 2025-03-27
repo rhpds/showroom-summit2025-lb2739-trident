@@ -63,9 +63,10 @@ image::Wordpress_Admin_AddNewPost.png[AddNewPost]
 
 Write Something nice or funny, and when ready press on the two successive `Publish` buttons. +
 In another window, connect to the main page of the Wordpress user site to visualize the result.
-image::Wordpress_Admin_FirstPost.png[FirstPost]
+image::Wordpress_FirstPost.png[FirstPost]
 
-Tadaaaa! Your first application is now ready.
+Tadaaaa! +
+Your first application is now ready. +
 Let's look at Virtual Machines.
 
 [#deployvm]

@@ -1,1 +1,5 @@
 # Module 7: Bonus
+
+= Disaster Recovery for your Wordpress 
+
+tridentctl-protect get app bbox -n bbox -o json | jq -r .metadata.uid

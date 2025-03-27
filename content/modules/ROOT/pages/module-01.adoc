@@ -1,0 +1,23 @@
+# Module 1: Introduction & Overview
+
+While the persistent storage challenge has been solved for a few years, thanks to the CSI standard (Container Storage Interface), data protection brings new problems to overcome, especially when application consistency is required.
+With the growing demand to host VM on container platforms, the protection of these workloads becomes essential.
+
+This lab focuses on storage (NetApp Trident) & data protection (NetApp Trident Protect) capabilities provided by NetApp for both containers & VM worklads.
+
+The underlying storage service is AWS FSx for NetApp ONTAP which provides fully managed shared storage with features like snapshots, cloning, and data tiering.
+
+
+== NetApp Trident
+
+Trident is a fully supported open source project maintained by NetApp. It has been designed from the ground up to help you meet your containerized applications' persistence demands using industry-standard interfaces, such as the Container Storage Interface (CSI).
+
+Trident features also address data protection, disaster recovery, portability, and migration use cases for Kubernetes workloads leveraging NetApp's industry-leading data management technology for snapshots, backups, replication, and cloning.
+
+== NetApp Trident Protect
+
+NetApp Trident protect provides advanced application data management capabilities that enhance the functionality and availability of stateful Kubernetes applications backed by the NetApp Trident CSI storage provisioner. Trident protect simplifies the management, protection, and movement of containerized workloads across public clouds and on-premises environments. It also offers automation capabilities through its API and CLI
+
+== AWS FSx for NetApp ONTAP
+
+Amazon FSx for NetApp ONTAP is a storage service that allows customers to launch and run fully managed ONTAP file systems in the cloud. ONTAP is NetApp’s file system technology that provides a widely adopted set of data access and data management capabilities. Amazon FSx for NetApp ONTAP provides the familiar features, performance, and APIs of on-premises NetApp file systems with the agility, scalability, and simplicity of a fully managed AWS service. 

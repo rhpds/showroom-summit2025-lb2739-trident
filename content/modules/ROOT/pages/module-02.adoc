@@ -4,26 +4,74 @@ This task is generally done by the OpenShift administrator.
 
 NetApp Trident can be installed in various ways:
 
-* Using a installer binary for very customized environments 
-* Using an operator manifest
-* Using a Helm Chart
+* Using a installer binary for heavily customized environments 
+* Using an operator
+* Using a Helm Chart (that installs the operator)
 
 Starting with NetApp Trident 25.02, this CSI driver is also available as a certified operator in the OperatorHub catalog. +
 You will use that method in this lab.
 
 [#operatorinstall]
-== Find the NetApp Trident Operator
+== Install the NetApp Trident Operator
 
 * Connect to the RedHat OpenShift GUI on the secondary cluster
 * Locate the *OperatorHub* sub-menu in the *Operators* category
 * Filter on *trident*
 
-OPERATOR IMAGE
+image::OCP_Console_OperatorHub_Trident.png[OperatorHub]
 
-== Install the NetApp Trident Operator
+* Press on the Trident box to enter the Installer window
 
-* Click on the operator to install
-* Review the details and press the `Install` button
+image::OCP_Console_OperatorHub_Trident_Install.png[Installer]
+
+* Press on the `Install` button which will open the configuration page, leave all the parameters as they are and press `Install`
+
+image::OCP_Console_OperatorHub_Trident_Install2.png[Configuration]
+
+* The installation is fairly quick. In less than 2 minutes, the Operator will be ready to use
+
+image::OCP_Console_OperatorHub_Trident_Installed.png[TridentInstalled]
+
+* After pressing on the `View Operator` button, you will enter the _details_ page of Trident.
+
+image::OCP_Console_OperatorHub_Trident_Details.png[TridentDetails]
+
+* Creating an instance of the Trident orchestrator will open new form
+
+image::OCP_Console_OperatorHub_TORC_form.png[TridentDetails]
+
+* Switch to `YAML view`, paste the following and press on `Create`
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+apiVersion: trident.netapp.io/v1
+kind: TridentOrchestrator
+metadata:
+  name: trident
+  namespace: openshift-operators 
+spec:
+  IPv6: false
+  debug: true
+  nodePrep:
+  - iscsi
+  imageRegistry: ''
+  k8sTimeout: 30
+  namespace: trident
+  silenceAutosupport: false
+----
+
+[TIP]
+====
+* CoreOS does not have iSCSI enabled and configured
+* Trident can configure and enable both iSCSI & Multipath services on all OpenShift worker nodes
+* This is achieved by adding the `nodePrep` parameter
+====
+
+* After a couple of minutes, the Trident Orchestrator will be fully installed
+
+image::OCP_Console_OperatorHub_TORC_installed.png[TridentDetails]
+
 
 == Verification with the command line
 
@@ -54,7 +102,7 @@ oc get tver -n trident
 [source,bash,subs="+macros,+attributes"]
 ----
 NAME      VERSION
-trident   25.02.1
+trident   25.02.0
 ----
 
 === Verify that all Trident pods are running
@@ -101,7 +149,7 @@ tridentctl -n trident version
 +----------------+----------------+
 | SERVER VERSION | CLIENT VERSION |
 +----------------+----------------+
-| 25.02.1        | 25.02.1        |
+| 25.02.0        | 25.02.1        |
 +----------------+----------------+
 ----
 
