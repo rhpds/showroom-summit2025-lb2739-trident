@@ -1,5 +1,131 @@
 # Module 7: Bonus
 
-= Disaster Recovery for your Wordpress 
+= Disaster Recovery for your Wordpress application
 
-tridentctl-protect get app bbox -n bbox -o json | jq -r .metadata.uid
+You can follow here the same methodology you applied in the _Module-06_ for the Virtual Machine.
+
+== Setup the mirroring
+
+You first need to retrieve the application ID on the source using the command line.
+
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+oc config use-context $(oc config get-contexts | grep -E default.*api-prod | cut -c 11- | awk '{print $1}')
+SRCAPPID=$(tridentctl-protect get app wordpress -n wordpress -o json | jq -r .metadata.uid)
+----
+
+With that information, you can create the mirror relationship on the DR cluster:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
+
+oc create ns wordpressdr
+
+cat << EOF | oc apply -f -
+apiVersion: protect.trident.netapp.io/v1
+kind: AppMirrorRelationship
+metadata:
+  name: wpamr1
+  namespace: wordpressdr
+spec:
+  desiredState: Established
+  destinationAppVaultRef: lab-vault
+  namespaceMapping:
+  - destination: wordpressdr
+    source: wordpress
+  recurrenceRule: |-
+    DTSTART:20240901T000200Z
+    RRULE:FREQ=MINUTELY;INTERVAL=5
+  sourceAppVaultRef: lab-vault
+  sourceApplicationName: wordpress
+  sourceApplicationUID: $SRCAPPID
+  storageClassName: storage-class-nfs
+EOF
+----
+Let's check the status of this new object on the DR cluster:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+tridentctlprotect get amr -n wordpressdr
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
++----------+--------------+-----------------+---------------+--------------+-----+-------+
+|   NAME   |  SOURCE APP  | DESTINATION APP | DESIRED STATE |     STATE    | AGE | ERROR |
++----------+--------------+-----------------+---------------+--------------+-----+-------+
+|  wpamr1  |  lab-vault   |    lab-vault    | Established   | Establishing | 41s |       |
++----------+--------------+-----------------+---------------+--------------+-----+-------+
+----
+It will take a couple of minutes for the mirroring to be setup, or `Established` in the Trident language.
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+tridentctlprotect get amr -n wordpressdr
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
++----------+--------------+-----------------+---------------+-------------+-------+-------+
+|   NAME   |  SOURCE APP  | DESTINATION APP | DESIRED STATE |    STATE    |  AGE  | ERROR |
++----------+--------------+-----------------+---------------+-------------+-------+-------+
+|  wpamr1  |  lab-vault   |    lab-vault    | Established   | Established |  1m30 |       |
++----------+--------------+-----------------+---------------+-------------+-------+-------+
+----
+
+== Failover your application
+
+Failover your application is pretty straight forward. +
+You just need to _patch_ the AMR on the DR cluster.
+
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+oc patch amr wpamr1 -n wordpressdr --type=merge -p '{"spec":{"desiredState":"Promoted"}}'
+----
+Fairly quickly, you should get to the following result:
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
++----------+--------------+-----------------+---------------+-------------+-------+-------+
+|   NAME   |  SOURCE APP  | DESTINATION APP | DESIRED STATE |    STATE    |  AGE  | ERROR |
++----------+--------------+-----------------+---------------+-------------+-------+-------+
+|  wpamr1  |  lab-vault   |    lab-vault    |   Promoted    |   Promoted  |  20s  |       |
++----------+--------------+-----------------+---------------+-------------+-------+-------+
+----
+
+Let's check the content of our namespace:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+oc get -n wordpressdr svc,po,pvc
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+NAME                                 TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)                      AGE
+service/wordpress                    LoadBalancer   172.30.57.162    aa7ccfdb52de24e73867ae11c11bedc0-1849430877.us-east-2.elb.amazonaws.com   80:30087/TCP,443:32446/TCP   10m
+service/wordpress-mariadb            ClusterIP      172.30.248.149   <none>                                                                    3306/TCP                     10m
+service/wordpress-mariadb-headless   ClusterIP      None             <none>                                                                    3306/TCP                     10m
+
+NAME                             READY   STATUS    RESTARTS   AGE
+pod/wordpress-74d5d98bcc-5hnhz   1/1     Running   0          10m
+pod/wordpress-mariadb-0          1/1     Running   0          10m
+
+NAME                                             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS        VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/data-wordpress-mariadb-0   Bound    pvc-9b53fcd7-09a9-4ce8-9b8e-9b24c22cd3ee   8Gi        RWO            storage-class-nfs   <unset>                 10m
+persistentvolumeclaim/wordpress                  Bound    pvc-774a516b-2205-462f-bf5d-d4014e37c72b   10Gi       RWO            storage-class-nfs   <unset>                 10m
+----
+
+As you can see, everything is back! +
+If you connect on your browser to the FQDN provided by the LoadBalancer, you should be able to connect to Wordpress and see the content create in the Module-03.
+
+= Backup/Restore of your VM
