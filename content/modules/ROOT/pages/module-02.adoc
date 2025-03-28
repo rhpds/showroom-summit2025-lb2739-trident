@@ -1,138 +1,419 @@
-= Managing an Application from GitHub
+# Module 2: Install and configure Trident on the DR OpenShift cluster
 
-In the first half of this workshop, we packaged an application into this portable container format manually using rpms.
-In the second half, we will consider that you may want to manage software from GitHub or some kind of software versioning application.
-Rather than installing rpms, we have individual software files and pull them out of that version control into a group of systems.
+This task is generally done by the OpenShift administrator.
 
-== Install RHEL 8 UBI
+NetApp Trident can be installed in various ways:
 
-In this lab, we will be using a different Red Hat Enterprise Linux version in my container. 
+* Using a installer binary for heavily customized environments 
+* Using an operator
+* Using a Helm Chart (that installs the operator)
 
-. Verify the host system release 
+Starting with NetApp Trident 25.02, this CSI driver is also available as a certified operator in the OperatorHub catalog. +
+You will use that method in this lab.
 
-+
+[#operatorinstall]
+== Install the NetApp Trident Operator
+
+* Connect to the RedHat OpenShift GUI on the secondary cluster
+* Locate the *OperatorHub* sub-menu in the *Operators* category
+* Filter on *trident*
+
+image::OCP_Console_OperatorHub_Trident.png[OperatorHub]
+
+* Press on the Trident box to enter the Installer window
+
+image::OCP_Console_OperatorHub_Trident_Install.png[Installer]
+
+* Press on the `Install` button which will open the configuration page, leave all the parameters as they are and press `Install`
+
+image::OCP_Console_OperatorHub_Trident_Install2.png[Configuration]
+
+* The installation is fairly quick. In less than 2 minutes, the Operator will be ready to use
+
+image::OCP_Console_OperatorHub_Trident_Installed.png[TridentInstalled]
+
+* After pressing on the `View Operator` button, you will enter the _details_ page of Trident.
+
+image::OCP_Console_OperatorHub_Trident_Details.png[TridentDetails]
+
+* Creating an instance of the Trident orchestrator will open new form
+
+image::OCP_Console_OperatorHub_TORC_form.png[TridentDetails]
+
+* Switch to `YAML view`, paste the following and press on `Create`
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+apiVersion: trident.netapp.io/v1
+kind: TridentOrchestrator
+metadata:
+  name: trident
+  namespace: openshift-operators 
+spec:
+  IPv6: false
+  debug: true
+  nodePrep:
+  - iscsi
+  imageRegistry: ''
+  k8sTimeout: 30
+  namespace: trident
+  silenceAutosupport: false
+----
+
+[TIP]
+====
+* CoreOS does not have iSCSI enabled and configured
+* Trident can configure and enable both iSCSI & Multipath services on all OpenShift worker nodes
+* This is achieved by adding the `nodePrep` parameter
+====
+
+* After a couple of minutes, the Trident Orchestrator will be fully installed
+
+image::OCP_Console_OperatorHub_TORC_installed.png[TridentDetails]
+
+
+== Verification with the command line
+
+* Connect to the jumphost
+* Log in OpenShift
+* Retrieve and verify the Trident version.
+
+=== Authenticate `oc` to the cluster
+
+The bastion provided with the RHDP workshop has the `aws` and `rosa` command line tools already installed and logged in.  The `oc` command is installed, but not authenticated.
+
+To authenticate `oc` use the API URL, username, and password provided by the RHDP lab deployment.
+
+[source,bash,role=execute,subs="attributes"]
+----
+oc login -u {rosa2_openshift_admin_user} -p {rosa2_openshift_admin_password} {rosa2_openshift_api_url}
+----
+
+[#tridentinstalled]
+=== Check the Trident version
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+oc get tver -n trident
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+NAME      VERSION
+trident   25.02.0
+----
+
+=== Verify that all Trident pods are running
+
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+oc get pods -n trident
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+NAME                                  READY   STATUS    RESTARTS   AGE
+trident-controller-599494bc5f-qnssz   6/6     Running   0          34s
+trident-node-linux-4s6jg              2/2     Running   0          34s
+trident-node-linux-9jx9g              2/2     Running   0          34s
+trident-node-linux-d7b7x              2/2     Running   0          34s
+trident-node-linux-jrv8v              2/2     Running   0          34s
+trident-node-linux-lpcj4              2/2     Running   0          34s
+trident-node-linux-qm8nz              2/2     Running   0          34s
+trident-node-linux-sc2tn              2/2     Running   0          34s
+----
+
+Installing the _tridentctl_ binary on this environment could be useful, especially for troubleshooting.
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+wget https://github.com/NetApp/trident/releases/download/v25.02.1/trident-installer-25.02.1.tar.gz
+tar -xf trident-installer-25.02.1.tar.gz
+sudo cp trident-installer/tridentctl /usr/local/bin/tridentctl
+----
+Verify the installation by viewing the Trident version of the installed operator.
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+tridentctl -n trident version
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
++----------------+----------------+
+| SERVER VERSION | CLIENT VERSION |
++----------------+----------------+
+| 25.02.0        | 25.02.1        |
++----------------+----------------+
+----
+
+[#tridentconfiguration]
+== Configure Trident
+
+A *backend* defines the relationship between Trident and a storage system. It tells Trident how to communicate with that storage system and how Trident should provision volumes from it.
+These backends are linked to a *secret* which contains the credentials of the storage system.
+
+=== Create a secret to store the SVM username and password in the ROSA cluster
+
+This can be done vie the OpenShift Console or the GUI. +
+Let's use the cli:
+
+[source,bash,role=execute,subs="attributes"]
+----
+cat << EOF | oc apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dr-backend-fsxn-secret
+  namespace: trident
+type: Opaque
+stringData:
+  username: fsxadmin
+  password: Rosa12345
+EOF
+----
+
+Verify the secret has been added to the ROSA cluster.
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+oc get secrets -n trident dr-backend-fsxn-secret
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+NAME                        TYPE                                  DATA   AGE
+backend-fsxn-secret         Opaque                                2      24h
+----
+
+=== Create the Trident Backend for NFS
+
+Before creating the backend, you need to retrieve the management IP of the Storage Virtual Machine setup in AWS FSxN. +
+Let's assign it to a variable.
+
+[source,bash,role=execute,subs="attributes"]
+----
+export SVMIP=$(aws fsx describe-storage-virtual-machines | jq -r '.StorageVirtualMachines[].Endpoints.Management.IpAddresses[]') && echo $SVMIP
+----
+
+Run the following commands to create the Trident backend in the ROSA cluster.
+
+[source,bash,role=execute,subs="attributes"]
+----
+cat << EOF | oc apply -f -
+apiVersion: trident.netapp.io/v1
+kind: TridentBackendConfig
+metadata:
+  name: dr-backend-fsxn-nfs
+  namespace: trident
+spec:
+  version: 1
+  backendName: dr-fsxn-nfs
+  storageDriverName: ontap-nas
+  managementLIF: $SVMIP
+  nasType: nfs
+  autoExportCIDRs:
+  - 10.10.0.0/16
+  autoExportPolicy: true
+  storagePrefix: dr
+  defaults:
+    snapshotDir: 'true'
+    nameTemplate: "{{ .config.StoragePrefix }}_{{ .volume.Namespace }}_{{ .volume.RequestName }}"
+  credentials:
+    name: dr-backend-fsxn-secret
+EOF
+----
+
+Some explanations about the content of that manifest:
+
+* `autoExportPolicy`: lets Trident dynamically manage the NFS export policies in AWS FSXN by setting one rule per ROSA node
+* `autoExportCIDRs`: list of CIDRs to filter ROSA's nodes IP addresses against
+* `storagePrefix`: all volumes created by Trident will start with those letters
+* `nameTemplate`: all volumes created by Trident will follow that naming convention (instead of using the PV UUID)
+
+Verify the backend configuration.
+
+[source,bash,role=execute,subs="attributes"]
+----
+oc get tridentbackendconfigs backend-fsxn-nfs -n trident
+----
+[.lines_space]
+[.console-output]
 [source,bash]
 ----
-cat /etc/redhat-release
+NAME               BACKEND NAME   BACKEND UUID                           PHASE   STATUS
+backend-fsxn-nfs   fsxn-nfs       1f490bf3-492c-4ef7-899e-9e7d8711c82f   Bound   Success
 ----
-+ 
-NOTE: The `bastion` system is Red Hat Enterprise Linux 9, and when you built the previous container, you used the UBI9 image. This means both the image and the container were built off the same Red Hat Enterprise Linux packages. 
 
-. As we did previously in this lab, Use `buildah from` to pull down the Red Hat Enterprise Linux 8 UBI.
+=== Create the Trident Backend for iSCSI
 
-+
+The IP from the SVM has already been assigned to a variable in the previous paragraph. +
+You can reuse the same one here, as the same SVM will be used for both protocols
+
+[source,bash,role=execute,subs="attributes"]
+----
+cat << EOF | oc apply -f -
+apiVersion: trident.netapp.io/v1
+kind: TridentBackendConfig
+metadata:
+  name: dr-backend-fsxn-iscsi
+  namespace: trident
+spec:
+  version: 1
+  backendName: dr-fsxn-iscsi
+  storageDriverName: ontap-san
+  managementLIF: 10.0.63.80
+  sanType: iscsi
+  credentials:
+    name: dr-backend-fsxn-secret
+EOF
+----
+
+Verify the backend configuration.
+[source,bash,role=execute,subs="attributes"]
+----
+oc get tridentbackendconfigs dr-backend-fsxn-iscsi -n trident
+----
+[.lines_space]
+[.console-output]
 [source,bash]
 ----
-buildah from registry.access.redhat.com/ubi8/ubi
+NAME                    BACKEND NAME        BACKEND UUID                           PHASE   STATUS
+dr-backend-fsxn-iscsi   dr-fsxn-iscsi       1f490bf3-492c-4ef7-899e-9e7d8711c82g   Bound   Success
 ----
 
-NOTE: Because you already pulled one image named `ubi-working-container` this one is called `ubi-working-container-1`. 
+[#storageclasses]
+== Storage Classes
 
-[#prerequisites]
-== Install Prerequisites
+The very last step is about creating storage classes that will use Trident backends. +
+A storage class is necessary to instruct Trident how to provision volumes.  
 
-Now that you have a working container, you will use the same process as before installing all the prerequisites, changing config files, and manipulating the contents of this container to be in the desired state.
+[NOTE]
+====
+ReadWriteMany (RWX) is required for *_Live Migration_* of your VMs. 
+This access mode is supported with all protocols proposed by Trident (File and Block).  
+====
 
-The software you will install is a JavaScript-based game that runs on a web browser. As before in the lab, use dnf to install software inside the container. 
+However, configuring a RWX workload with a block protocol such as iSCSI requires two things:
 
-. Use `buildah run` and install Apache (`httpd`) into the `ubi-working-container-1` container. 
-+
-[source,bash]
+* the storage class must not specifcy any filesystem
+* the PVC must explicitly mention `volumeMode: Block`
+
+You are going to create 3 storage classes:
+
+* `storage-class-nfs`: File workdloads, supports all ROSA access modes
+* `storage-class-iscsi-fs`: Block workloads, does not support RWX access mode
+* `storage-class-iscsi-blk`: Block workloads, supports all access modes, including RWX
+
+=== Create a NFS Storage Class
+
+Run the following command to create the first storage class in the ROSA cluster. +
+This will be done via the lab console.
+
+[source,bash,role=execute,subs="attributes"]
 ----
-buildah run ubi-working-container-1 -- dnf -y install httpd
-----
-
-== Enable Service
-
-The next thing to do is to use a systemctl to enable the service. The ubi-init provides full systemd service to the container.
-This will start up any of the services that are enabled. 
-
-. Enable the `httpd` service using `buildah run`
-
-+
-[source,bash]
-----
-buildah run ubi-working-container-1 -- systemctl enable httpd
-----
-
-NOTE: The UBI standard image doesn't have systemd installed on it by default. The `ubi-init` container image does include systemd. Plan accordingly to which image you use to build applications.  
-
-== Explore Source Materials
-
-A GitHub repository has already been synchronized to `/home/devops/clumsy-bird/` This repository contains the configurations for your application.
-
-. Verify the repository is cloned inside the `/home/devops/` directory
-+
-[source,bash]
-----
-cd /home/devops/
-----
-
-+
-[source,bash]
-----
-git clone https://github.com/ellisonleao/clumsy-bird
-----
-+
-NOTE: The output states that the software has already been checked out. 
-+
-. Explore the JavaScript contents, index files, and everything else that we need for this web-based JavaScript software.
-+
-[source,bash,role=execute]
-----
-ls clumsy-bird
+cat << EOF | oc apply -f -
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: storage-class-nfs
+provisioner: csi.trident.netapp.io
+parameters:
+  backendType: "ontap-nas"
+  nasType: "nfs"
+allowVolumeExpansion: true
+EOF
 ----
 
-== Add Source Materials to Container
+Verify the storage class creation.
 
-. Now that you have verified the source materials exist, you will put the software inside of my container image using the `buildah copy` command.
-+
-[source,bash]
+[source,bash,role=execute,subs="attributes"]
 ----
-buildah copy ubi-working-container-1 clumsy-bird /var/www/html
+oc get sc storage-class-nfs
 ----
-
-[#container]
-== Enable Container in Background
-
-In the previous section of this lab, you ran the game natively through interactive mode. Because you are now building a web application you will need to run the container in the background and access it through a web address. 
-
-. Execute `buildah config` to specify a port and initialize the container. 
-
-+
-[source,bash]
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
 ----
-buildah config --port 80 --cmd "/usr/sbin/init" ubi-working-container-1
+NAME                      PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+storage-class-nfs         csi.trident.netapp.io   Delete          Immediate              true                   10s
 ----
 
-NOTE: The command makes a configuration change to this container. I'm configuring this container to accept connections to its port 80. When the container starts up, it should run the init command, which, in this case, is going to be the Apache daemon right from earlier when I enabled it.
+=== Create an iSCSI Storage Class with a file system
 
-== Commit Container and Deploy
+This will be done with the OpenShift Console. +
+Once connected to the GUI, navigate to the `Storage` menu and `StorageClasses` sub-menu. +
 
-. Now that we have a container in a working configured state, it is time to make that permanent by committing it to a container image called `clumsy-bird`
-+
-[source,bash]
+You can easily create a new one by pressing on the `Create StorageClass` button at the top right of the screen. +
+Once on this page, switch to edit mode by clicking on the `Edit YAML` link, and paste the following and press on Create
+
+[.lines_space]
+[.console-output]
+[source,yaml]
 ----
-buildah commit ubi-working-container-1 clumsy-bird
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: storage-class-iscsi-fs
+provisioner: csi.trident.netapp.io
+parameters:
+  backendType: "ontap-san"
+  sanType: "iscsi"
+  fsType: "ext4"
+mountOptions:
+   - discard
+allowVolumeExpansion: true
 ----
 
-. Verify that the image was created with `podman`
-+
-[source,bash]
+image::OCP_Console_Storage_Classes_Create.png[storageclasses]
+
+Verify the storage class creation.
+[source,bash,role=execute,subs="attributes"]
 ----
-podman images
+oc get sc storage-class-iscsi-fs
 ----
-+
-. Run the container Now it's time to run the container. 
-+
-[source,bash]
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
 ----
-podman run -d -p 8500:80 clumsy-bird
+NAME                      PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+storage-class-iscsi-fs    csi.trident.netapp.io   Delete          Immediate              true                   10s
 ----
 
-== Verify Application
+=== Create an iSCSI Storage Class for RWX workloads
 
-Verify that the application is running by navigating to
+Use the same method as the previous storage class, via the GUI. +
+Copy & paste the following:
+[source,bash,role=execute,subs="attributes"]
+----
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: storage-class-iscsi-blk
+provisioner: csi.trident.netapp.io
+parameters:
+  backendType: "ontap-san"
+  sanType: "iscsi"
+allowVolumeExpansion: true
+----
 
-http://bastion.{guid}.example.opentlc.com:8500
+Verify the storage class creation.
+[source,bash,role=execute,subs="attributes"]
+----
+oc get sc storage-class-iscsi-fs
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+NAME                      PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+storage-class-iscsi-fs    csi.trident.netapp.io   Delete          Immediate              true                   10s
+----
 
+This is also visible in the OpenShift Console:
+
+image::OCP_Console_Storage_Classes.png[storageclasses]

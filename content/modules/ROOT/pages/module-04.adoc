@@ -1,0 +1,165 @@
+# Module 4: Install and configure Trident Protect on the DR OpenShift cluster
+
+Trident Protect is installed with a Helm Chart, which makes the experience pretty easy.
+This task is usually performed by the Kubernetes admin.
+
+First, check the current context you are using and switch if required.
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+kubectl config get-contexts
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+CURRENT   NAME                          CLUSTER      AUTHINFO           NAMESPACE
+          kub2-admin@kub2               kub2         kub2-admin
+*         kubernetes-admin@kubernetes   kubernetes   kubernetes-admin
+----
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+kubectl config use-context kub2-admin@kub2
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+Switched to context "kub2-admin@kub2"
+----
+
+Also make sure Trident Protect is not present:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+oc get ns trident-protect
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+Error from server (NotFound): namespaces "trident-protect" not found
+----
+
+[#installtridentprotect]
+You are now ready to proceed:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+helm repo add netapp-trident-protect https://netapp.github.io/trident-protect-helm-chart/
+oc create ns trident-protect
+helm install trident-protect-crds netapp-trident-protect/trident-protect-crds --version 100.2502.0 --namespace trident-protect
+helm install trident-protect netapp-trident-protect/trident-protect --set clusterName=dr --version 100.2502.0 --namespace trident-protect
+----
+
+If everything well, you should find a new POD in the _trident-protect_ namespace:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+oc get po -n trident-protect
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+NAME                                                           READY   STATUS    RESTARTS   AGE
+trident-protect-controller-manager-7cdff78665-brjxk            2/2     Running   0          30s
+----
+There are also a whole list of CRD installed with Trident Protect:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+oc get crd | grep protect
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+applications.protect.trident.netapp.io                 2025-03-17T14:23:58Z
+appmirrorrelationships.protect.trident.netapp.io       2025-03-17T14:23:58Z
+appmirrorupdates.protect.trident.netapp.io             2025-03-17T14:23:58Z
+appvaults.protect.trident.netapp.io                    2025-03-17T14:23:58Z
+autosupportbundles.protect.trident.netapp.io           2025-03-17T14:23:58Z
+autosupportbundleschedules.protect.trident.netapp.io   2025-03-17T14:23:58Z
+backupinplacerestores.protect.trident.netapp.io        2025-03-17T14:23:58Z
+backuprestores.protect.trident.netapp.io               2025-03-17T14:23:58Z
+backups.protect.trident.netapp.io                      2025-03-17T14:23:58Z
+exechooks.protect.trident.netapp.io                    2025-03-17T14:23:58Z
+exechooksruns.protect.trident.netapp.io                2025-03-17T14:23:58Z
+kopiavolumebackups.protect.trident.netapp.io           2025-03-17T14:23:58Z
+kopiavolumerestores.protect.trident.netapp.io          2025-03-17T14:23:58Z
+pvccopies.protect.trident.netapp.io                    2025-03-17T14:23:58Z
+pvcerases.protect.trident.netapp.io                    2025-03-17T14:23:58Z
+resourcebackups.protect.trident.netapp.io              2025-03-17T14:23:58Z
+resourcedeletes.protect.trident.netapp.io              2025-03-17T14:23:58Z
+resourcerestores.protect.trident.netapp.io             2025-03-17T14:23:58Z
+resticvolumebackups.protect.trident.netapp.io          2025-03-17T14:23:58Z
+resticvolumerestores.protect.trident.netapp.io         2025-03-17T14:23:58Z
+schedules.protect.trident.netapp.io                    2025-03-17T14:23:58Z
+shutdownsnapshots.protect.trident.netapp.io            2025-03-17T14:23:58Z
+snapshotinplacerestores.protect.trident.netapp.io      2025-03-17T14:23:58Z
+snapshotrestores.protect.trident.netapp.io             2025-03-17T14:23:58Z
+snapshots.protect.trident.netapp.io                    2025-03-17T14:23:58Z
+----
+
+[#configureappvault]
+Trident Protect uses a S3 compatible bucket to save the application metadata, as well as the data when a backup is performed. +
+The CR that represent that bucket is called an *_AppVault_*. +
+The admin could create an AppVault used by all possible applications, or create specific ones per application (in which case you would have multiple buckets). +
+As we have only one bucket available, let's create a single AppVault.
+
+You first need to create two secrets:
+* one to host the bucket keys
+* one to host a password for the repository encryption (_optional_)
+
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+kubectl create secret generic -n trident-protect aws-s3-keys --from-literal=accessKeyID={aws_access_key_id} --from-literal=secretAccessKey={aws_secret_access_key}
+kubectl create secret generic -n trident-protect appvault-secret --from-literal=KOPIA_PASSWORD=password # <1>
+----
+<1> replace `password` with something imaginative
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
+secret/aws-s3-keys created
+secret/appvault-secret created
+----
+
+You are now ready to proceed with the AppVault creation, which is done in the _trident-protect_ namespace.
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+tridentctl protect create appvault AWS lab-vault --secret aws-s3-keys --bucket {aws_s3_bucket_name} --endpoint {aws_s3_endpoint} --data-mover-password-secret-ref appvault-secret -n trident-protect
+tridentctl protect get appvault -n trident-protect
+----
+[.console-output]
+[source,bash,subs="+macros,+attributes"]
+----
++--------------+----------+-----------+------+-------+
+|     NAME     | PROVIDER |   STATE   | AGE  | ERROR |
++--------------+----------+-----------+------+-------+
+|   lab-vault  |   AWS    | Available |   1m |       |
++--------------+----------+-----------+------+-------+
+----
+
+[NOTE] 
+====
+In a production environment, the administrator may also perform the following tasks:
+* create the user namespace
+* create a service account that allows the creation of a Trident Protect application in that namespace
+* grant access to AppVault objects for individual users
+====
+
+[TIP]
+====
+In a real architecture where you want to implement a DR accross multiple regions, you may want to create a bucket & an AppVault per region.
+Trident Protect will take care of copying the application metadata between both buckets.
+====
+
+As we are going to run the whole lab as an admin, those 3 tasks are not covered.
+For further details on access control, please refer to this https://docs.netapp.com/us-en/trident/trident-protect/manage-authorization-access-control.html[link]
