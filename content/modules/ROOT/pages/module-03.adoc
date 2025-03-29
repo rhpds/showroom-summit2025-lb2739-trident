@@ -13,7 +13,7 @@ Let's deploy it on the production cluster with the help of a Helm chart.
 
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 helm repo add bitnami https://charts.bitnami.com/bitnami
 
@@ -29,12 +29,12 @@ NOTE: It takes a tiny bit more than a minute for the installation to complete.
 Check the content of the `wordpress` namespace.
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get -n wordpress svc,po,pvc
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 NAME                                 TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)                      AGE
 service/wordpress                    LoadBalancer   172.30.57.162    aa7ccfdb52de24e73867ae11c11bedc0-1849430877.us-east-2.elb.amazonaws.com   80:30087/TCP,443:32446/TCP   10m
@@ -52,24 +52,34 @@ persistentvolumeclaim/wordpress                  Bound    pvc-774a516b-2205-462f
 
 Notice the wordpress service ? +
 Copy & paste the address provided by the Load Balancer in your browser in order to access WordPress:
-image::Wordpress_HelloWorld.png[HelloWorld]
+image::Mod3_Wordpress_HelloWorld.png[HelloWorld]
 
 Before protecting that application, you may want to create your own blog. +
 You first need to connect to the admin page (use the same URL as Wordpress followed by "/wp-admin"). +
 This will ask for credentials, which you set in the Helm chart (`rosa`/`Rosa12345`).
 
 Once logged in, you need to click on `Posts` in the left bar, and then press on the `Add New Post` button.
-image::Wordpress_Admin_AddNewPost.png[AddNewPost]
+image::Mod3_Wordpress_Admin_AddNewPost.png[AddNewPost]
 
 Write Something nice or funny, and when ready press on the two successive `Publish` buttons. +
 In another window, connect to the main page of the Wordpress user site to visualize the result.
-image::Wordpress_FirstPost.png[FirstPost]
+image::Mod3_Wordpress_FirstPost.png[FirstPost]
 
 Tadaaaa! +
 Your first application is now ready. +
 Let's look at Virtual Machines.
 
 [#deployvm]
-== Deploy a simple VM an iSCSI volume
+== Deploy a simple VM with an Block RWX volume
 
-TBD
+* Let's deploy a VM in a new project. +
+For this chapter, most tasks are going to be done in the OpenShift GUI.
+
+Log into OpenShift and create a new project (`myVM` in the example)
+
+image::Mod3_OCP_Console_Project_Create.png[projectCreation]
+
+* Navigate to the `VirtualMachines` sub-menu of the `Virtualization` menu, press `Create `Virtual Machine` and then choose `FromTemplate`
+
+image::Mod3_OCP_Console_VM_Create.png[VMCreation]
+

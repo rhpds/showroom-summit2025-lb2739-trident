@@ -6,38 +6,38 @@ This task is usually performed by the Kubernetes admin.
 First, check the current context you are using and switch if required.
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
-kubectl config get-contexts
+oc config get-contexts
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
-CURRENT   NAME                          CLUSTER      AUTHINFO           NAMESPACE
-          kub2-admin@kub2               kub2         kub2-admin
-*         kubernetes-admin@kubernetes   kubernetes   kubernetes-admin
+CURRENT   NAME                                                                  CLUSTER                                         AUTHINFO                                                      NAMESPACE
+          default/api-dr-gqszb-rpz0-p1-openshiftapps-com:6443/cluster-admin     api-dr-gqszb-rpz0-p1-openshiftapps-com:6443     cluster-admin/api-dr-gqszb-rpz0-p1-openshiftapps-com:6443     default
+*         default/api-prod-gqszb-w9bz-p1-openshiftapps-com:6443/cluster-admin   api-prod-gqszb-w9bz-p1-openshiftapps-com:6443   cluster-admin/api-prod-gqszb-w9bz-p1-openshiftapps-com:6443   default
 ----
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
-kubectl config use-context kub2-admin@kub2
+oc config use-context default/api-dr-gqszb-rpz0-p1-openshiftapps-com:6443/cluster-admin
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
-Switched to context "kub2-admin@kub2"
+Switched to context "default/api-dr-gqszb-rpz0-p1-openshiftapps-com:6443/cluster-admin"
 ----
 
 Also make sure Trident Protect is not present:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get ns trident-protect
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 Error from server (NotFound): namespaces "trident-protect" not found
 ----
@@ -46,7 +46,7 @@ Error from server (NotFound): namespaces "trident-protect" not found
 You are now ready to proceed:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 helm repo add netapp-trident-protect https://netapp.github.io/trident-protect-helm-chart/
 oc create ns trident-protect
@@ -57,12 +57,12 @@ helm install trident-protect netapp-trident-protect/trident-protect --set cluste
 If everything well, you should find a new POD in the _trident-protect_ namespace:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get po -n trident-protect
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 NAME                                                           READY   STATUS    RESTARTS   AGE
 trident-protect-controller-manager-7cdff78665-brjxk            2/2     Running   0          30s
@@ -70,12 +70,12 @@ trident-protect-controller-manager-7cdff78665-brjxk            2/2     Running  
 There are also a whole list of CRD installed with Trident Protect:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get crd | grep protect
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 applications.protect.trident.netapp.io                 2025-03-17T14:23:58Z
 appmirrorrelationships.protect.trident.netapp.io       2025-03-17T14:23:58Z
@@ -116,14 +116,14 @@ You first need to create two secrets:
 
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 kubectl create secret generic -n trident-protect aws-s3-keys --from-literal=accessKeyID={aws_access_key_id} --from-literal=secretAccessKey={aws_secret_access_key}
 kubectl create secret generic -n trident-protect appvault-secret --from-literal=KOPIA_PASSWORD=password # <1>
 ----
 <1> replace `password` with something imaginative
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 secret/aws-s3-keys created
 secret/appvault-secret created
@@ -132,13 +132,13 @@ secret/appvault-secret created
 You are now ready to proceed with the AppVault creation, which is done in the _trident-protect_ namespace.
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctl protect create appvault AWS lab-vault --secret aws-s3-keys --bucket {aws_s3_bucket_name} --endpoint {aws_s3_endpoint} --data-mover-password-secret-ref appvault-secret -n trident-protect
 tridentctl protect get appvault -n trident-protect
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 +--------------+----------+-----------+------+-------+
 |     NAME     | PROVIDER |   STATE   | AGE  | ERROR |

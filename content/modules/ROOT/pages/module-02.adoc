@@ -18,32 +18,32 @@ You will use that method in this lab.
 * Locate the *OperatorHub* sub-menu in the *Operators* category
 * Filter on *trident*
 
-image::OCP_Console_OperatorHub_Trident.png[OperatorHub]
+image::Mod2_OCP_Console_OperatorHub_Trident.png[OperatorHub]
 
 * Press on the Trident box to enter the Installer window
 
-image::OCP_Console_OperatorHub_Trident_Install.png[Installer]
+image::Mod2_OCP_Console_OperatorHub_Trident_Install.png[Installer]
 
 * Press on the `Install` button which will open the configuration page, leave all the parameters as they are and press `Install`
 
-image::OCP_Console_OperatorHub_Trident_Install2.png[Configuration]
+image::Mod2_OCP_Console_OperatorHub_Trident_Install2.png[Configuration]
 
 * The installation is fairly quick. In less than 2 minutes, the Operator will be ready to use
 
-image::OCP_Console_OperatorHub_Trident_Installed.png[TridentInstalled]
+image::Mod2_OCP_Console_OperatorHub_Trident_Installed.png[TridentInstalled]
 
 * After pressing on the `View Operator` button, you will enter the _details_ page of Trident.
 
-image::OCP_Console_OperatorHub_Trident_Details.png[TridentDetails]
+image::Mod2_OCP_Console_OperatorHub_Trident_Details.png[TridentDetails]
 
 * Creating an instance of the Trident orchestrator will open new form
 
-image::OCP_Console_OperatorHub_TORC_form.png[TridentDetails]
+image::Mod2_OCP_Console_OperatorHub_TORC_form.png[TridentDetails]
 
 * Switch to `YAML view`, paste the following and press on `Create`
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 apiVersion: trident.netapp.io/v1
 kind: TridentOrchestrator
@@ -70,7 +70,7 @@ spec:
 
 * After a couple of minutes, the Trident Orchestrator will be fully installed
 
-image::OCP_Console_OperatorHub_TORC_installed.png[TridentDetails]
+image::Mod2_OCP_Console_OperatorHub_TORC_installed.png[TridentDetails]
 
 
 == Verification with the command line
@@ -85,7 +85,7 @@ The bastion provided with the RHDP workshop has the `aws` and `rosa` command lin
 
 To authenticate `oc` use the API URL, username, and password provided by the RHDP lab deployment.
 
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc login -u {rosa2_openshift_admin_user} -p {rosa2_openshift_admin_password} {rosa2_openshift_api_url}
 ----
@@ -94,7 +94,7 @@ oc login -u {rosa2_openshift_admin_user} -p {rosa2_openshift_admin_password} {ro
 === Check the Trident version
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get tver -n trident
 ----
@@ -109,7 +109,7 @@ trident   25.02.0
 
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get pods -n trident
 ----
@@ -130,7 +130,7 @@ trident-node-linux-sc2tn              2/2     Running   0          34s
 Installing the _tridentctl_ binary on this environment could be useful, especially for troubleshooting.
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 wget https://github.com/NetApp/trident/releases/download/v25.02.1/trident-installer-25.02.1.tar.gz
 tar -xf trident-installer-25.02.1.tar.gz
@@ -139,7 +139,7 @@ sudo cp trident-installer/tridentctl /usr/local/bin/tridentctl
 Verify the installation by viewing the Trident version of the installed operator.
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctl -n trident version
 ----
@@ -164,7 +164,7 @@ These backends are linked to a *secret* which contains the credentials of the st
 This can be done vie the OpenShift Console or the GUI. +
 Let's use the cli:
 
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 cat << EOF | oc apply -f -
 apiVersion: v1
@@ -174,7 +174,7 @@ metadata:
   namespace: trident
 type: Opaque
 stringData:
-  username: fsxadmin
+  username: vsadmin
   password: Rosa12345
 EOF
 ----
@@ -182,7 +182,7 @@ EOF
 Verify the secret has been added to the ROSA cluster.
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get secrets -n trident dr-backend-fsxn-secret
 ----
@@ -198,14 +198,14 @@ backend-fsxn-secret         Opaque                                2      24h
 Before creating the backend, you need to retrieve the management IP of the Storage Virtual Machine setup in AWS FSxN. +
 Let's assign it to a variable.
 
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 export SVMIP=$(aws fsx describe-storage-virtual-machines | jq -r '.StorageVirtualMachines[].Endpoints.Management.IpAddresses[]') && echo $SVMIP
 ----
 
 Run the following commands to create the Trident backend in the ROSA cluster.
 
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 cat << EOF | oc apply -f -
 apiVersion: trident.netapp.io/v1
@@ -219,13 +219,13 @@ spec:
   storageDriverName: ontap-nas
   managementLIF: $SVMIP
   nasType: nfs
-  autoExportCIDRs:
+  autoExportCIDRs:        # <2>
   - 10.10.0.0/16
-  autoExportPolicy: true
-  storagePrefix: dr
+  autoExportPolicy: true  # <1>
+  storagePrefix: dr       # <3>
   defaults:
     snapshotDir: 'true'
-    nameTemplate: "{{ .config.StoragePrefix }}_{{ .volume.Namespace }}_{{ .volume.RequestName }}"
+    nameTemplate: "{{ .config.StoragePrefix }}_{{ .volume.Namespace }}_{{ .volume.RequestName }}"  # <4>
   credentials:
     name: dr-backend-fsxn-secret
 EOF
@@ -233,14 +233,14 @@ EOF
 
 Some explanations about the content of that manifest:
 
-* `autoExportPolicy`: lets Trident dynamically manage the NFS export policies in AWS FSXN by setting one rule per ROSA node
-* `autoExportCIDRs`: list of CIDRs to filter ROSA's nodes IP addresses against
-* `storagePrefix`: all volumes created by Trident will start with those letters
-* `nameTemplate`: all volumes created by Trident will follow that naming convention (instead of using the PV UUID)
+<1> `autoExportPolicy`: lets Trident dynamically manage the NFS export policies in AWS FSXN by setting one rule per ROSA node
+<2> `autoExportCIDRs`: list of CIDRs to filter ROSA's nodes IP addresses against
+<3> `storagePrefix`: all volumes created by Trident will start with those letters
+<4> `nameTemplate`: all volumes created by Trident will follow that naming convention (instead of using the PV UUID)
 
 Verify the backend configuration.
 
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get tridentbackendconfigs backend-fsxn-nfs -n trident
 ----
@@ -257,7 +257,7 @@ backend-fsxn-nfs   fsxn-nfs       1f490bf3-492c-4ef7-899e-9e7d8711c82f   Bound  
 The IP from the SVM has already been assigned to a variable in the previous paragraph. +
 You can reuse the same one here, as the same SVM will be used for both protocols
 
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 cat << EOF | oc apply -f -
 apiVersion: trident.netapp.io/v1
@@ -277,7 +277,7 @@ EOF
 ----
 
 Verify the backend configuration.
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get tridentbackendconfigs dr-backend-fsxn-iscsi -n trident
 ----
@@ -309,15 +309,14 @@ However, configuring a RWX workload with a block protocol such as iSCSI requires
 You are going to create 3 storage classes:
 
 * `storage-class-nfs`: File workdloads, supports all ROSA access modes
-* `storage-class-iscsi-fs`: Block workloads, does not support RWX access mode
-* `storage-class-iscsi-blk`: Block workloads, supports all access modes, including RWX
+* `storage-class-iscsi`: Block workloads, also supports all access modes
 
 === Create a NFS Storage Class
 
 Run the following command to create the first storage class in the ROSA cluster. +
 This will be done via the lab console.
 
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 cat << EOF | oc apply -f -
 apiVersion: storage.k8s.io/v1
@@ -334,7 +333,7 @@ EOF
 
 Verify the storage class creation.
 
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get sc storage-class-nfs
 ----
@@ -345,7 +344,7 @@ NAME                      PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGM
 storage-class-nfs         csi.trident.netapp.io   Delete          Immediate              true                   10s
 ----
 
-=== Create an iSCSI Storage Class with a file system
+=== Create an iSCSI Storage Class
 
 This will be done with the OpenShift Console. +
 Once connected to the GUI, navigate to the `Storage` menu and `StorageClasses` sub-menu. +
@@ -360,60 +359,39 @@ Once on this page, switch to edit mode by clicking on the `Edit YAML` link, and 
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: storage-class-iscsi-fs
+  name: storage-class-iscsi
+  annotations:
+    storageclass.kubevirt.io/is-default-virt-class: 'true' # <1>
 provisioner: csi.trident.netapp.io
 parameters:
   backendType: "ontap-san"
   sanType: "iscsi"
-  fsType: "ext4"
 mountOptions:
    - discard
 allowVolumeExpansion: true
 ----
+TIP
+====
+<1> Set this annotation to default the storage class to NetApp, as sometimes you don't explicitly have a choice to select a storage class.
+====
 
-image::OCP_Console_Storage_Classes_Create.png[storageclasses]
+image::Mod2_OCP_Console_Storage_Classes_Create.png[storageclasses]
+====> UPDATE IMAGE
+
 
 Verify the storage class creation.
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
-oc get sc storage-class-iscsi-fs
+oc get sc storage-class-iscsi
 ----
 [.console-output]
 [source,bash,subs="+macros,+attributes"]
 ----
-NAME                      PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
-storage-class-iscsi-fs    csi.trident.netapp.io   Delete          Immediate              true                   10s
-----
-
-=== Create an iSCSI Storage Class for RWX workloads
-
-Use the same method as the previous storage class, via the GUI. +
-Copy & paste the following:
-[source,bash,role=execute,subs="attributes"]
-----
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: storage-class-iscsi-blk
-provisioner: csi.trident.netapp.io
-parameters:
-  backendType: "ontap-san"
-  sanType: "iscsi"
-allowVolumeExpansion: true
-----
-
-Verify the storage class creation.
-[source,bash,role=execute,subs="attributes"]
-----
-oc get sc storage-class-iscsi-fs
-----
-[.console-output]
-[source,bash,subs="+macros,+attributes"]
-----
-NAME                      PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
-storage-class-iscsi-fs    csi.trident.netapp.io   Delete          Immediate              true                   10s
+NAME                   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+storage-class-iscsi    csi.trident.netapp.io   Delete          Immediate              true                   10s
 ----
 
 This is also visible in the OpenShift Console:
 
-image::OCP_Console_Storage_Classes.png[storageclasses]
+image::Mod2_OCP_Console_Storage_Classes.png[storageclasses]
+====> UPDATE IMAGE

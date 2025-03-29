@@ -36,7 +36,7 @@ Defining an application can be done with the _tridentctl-protect_ cli or via CR 
 
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctl-protect create app wordpress --namespaces wordpress -n wordpress
 ----
@@ -52,12 +52,12 @@ TIP: running this command with the `--dry-run` parameter will display the corres
 Check that the application is present:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctl-protect get app -n wordpress
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 +-----------+------------+-------+-----+
 |   NAME    | NAMESPACES | STATE | AGE |
@@ -85,19 +85,19 @@ You can find examples on this repo: https://github.com/NetApp/Verda
 Let's create one snapshot of the Wordpress app:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctl protect create snapshot wpsnap1 --app wordpress --appvault lab-vault -n wordpress
 ----
 Check that the snapshot is done:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctl protect get snap -n wordpress
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 +-----------+--------------+-----------+-----+-------+
 |   NAME    |    APP REF   |   STATE   | AGE | ERROR |
@@ -118,19 +118,19 @@ Let's create one backup of the Wordpress app, based on the snapshot you just too
 
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctl protect create backup wpbkp1 --app wordpress --snapshot wpsnap1 --appvault lab-vault -n wordpress
 ----
 Check that the backup is done:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctl protect get backup -n wordpress
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 +-----------+--------------+-----------+-------+-------+
 |   NAME    |    APP REF   |   STATE   |  AGE  | ERROR |
@@ -154,7 +154,7 @@ Make sure you are logged into the production cluster.
 
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 cat << EOF | oc apply -f -
 apiVersion: protect.trident.netapp.io/v1
@@ -177,12 +177,12 @@ EOF
 ----
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctl protect get schedule -n wordpress
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 +-------------+-----------+--------------------------------+---------+-------+-----+-------+
 |    NAME     |    APP    |            SCHEDULE            | ENABLED | STATE | AGE | ERROR |
@@ -194,7 +194,7 @@ tridentctl protect get schedule -n wordpress
 After a few minutes, you are going to see new snapshots and backups appearing with the following command:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctl-protect get snapshot -n wordpress
 tridentctl-protect get backup -n wordpress
@@ -219,13 +219,13 @@ For this, you first need to find out the full path of your backup in the bucket.
 From the console, run the 2 following commands to browse the AppVault:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctl protect get appvaultcontent lab-vault --app wordpress --show-resources all -n trident-protect
 tridentctl protect get appvaultcontent lab-vault --app wordpress --show-resources backup --show-paths -n trident-protect
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 +---------+-----------+----------+-----------------------------+---------------------------+
 | CLUSTER |    APP    |   TYPE   |            NAME             |         TIMESTAMP         |
@@ -249,7 +249,7 @@ Now that you have the full path of your backup, you can easily restore it on the
 Let's put the path of the backup in a variable and proceed with the restore
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 BKPPATH=$(tridentctl protect get appvaultcontent lab-vault --app wordpress --show-resources backup --show-paths -n trident-protect | grep wpbkp1  | awk -F '|' '{print $8}')
 
@@ -260,12 +260,12 @@ tridentctl protect create br wpbr1 --namespace-mapping wordpress:wordpressrestor
 After a couple of minutes, the process should be done:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctl protect get br -n wordpressrestore
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 +---------+---------------+-----------+-----+-------+
 |  NAME   |    APPVAULT   |   STATE   | AGE | ERROR |

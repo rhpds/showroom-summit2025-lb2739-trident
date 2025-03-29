@@ -6,20 +6,22 @@ You can follow here the same methodology you applied in the _Module-06_ for the 
 
 == Setup the mirroring
 
-You first need to retrieve the application ID on the source using the command line.
+You first need to retrieve the application ID on the source using the command line. +
+We will use the _oc config_ command line to switch between clusters context.
 
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc config use-context $(oc config get-contexts | grep -E default.*api-prod | cut -c 11- | awk '{print $1}')
 SRCAPPID=$(tridentctl-protect get app wordpress -n wordpress -o json | jq -r .metadata.uid)
 ----
 
-With that information, you can create the mirror relationship on the DR cluster:
+With that information, you can create the mirror relationship on the DR cluster. +
+As we use a YAML manifest, you also need to create the target namespace on the DR cluster.
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
 
@@ -49,12 +51,12 @@ EOF
 Let's check the status of this new object on the DR cluster:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctlprotect get amr -n wordpressdr
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 +----------+--------------+-----------------+---------------+--------------+-----+-------+
 |   NAME   |  SOURCE APP  | DESTINATION APP | DESIRED STATE |     STATE    | AGE | ERROR |
@@ -65,12 +67,12 @@ tridentctlprotect get amr -n wordpressdr
 It will take a couple of minutes for the mirroring to be setup, or `Established` in the Trident language.
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 tridentctlprotect get amr -n wordpressdr
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 +----------+--------------+-----------------+---------------+-------------+-------+-------+
 |   NAME   |  SOURCE APP  | DESTINATION APP | DESIRED STATE |    STATE    |  AGE  | ERROR |
@@ -86,13 +88,13 @@ You just need to _patch_ the AMR on the DR cluster.
 
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc patch amr wpamr1 -n wordpressdr --type=merge -p '{"spec":{"desiredState":"Promoted"}}'
 ----
 Fairly quickly, you should get to the following result:
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 +----------+--------------+-----------------+---------------+-------------+-------+-------+
 |   NAME   |  SOURCE APP  | DESTINATION APP | DESIRED STATE |    STATE    |  AGE  | ERROR |
@@ -104,12 +106,12 @@ Fairly quickly, you should get to the following result:
 Let's check the content of our namespace:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get -n wordpressdr svc,po,pvc
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 NAME                                 TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)                      AGE
 service/wordpress                    LoadBalancer   172.30.57.162    aa7ccfdb52de24e73867ae11c11bedc0-1849430877.us-east-2.elb.amazonaws.com   80:30087/TCP,443:32446/TCP   10m
