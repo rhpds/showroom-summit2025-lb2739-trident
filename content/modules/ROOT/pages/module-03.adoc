@@ -83,3 +83,11 @@ image::Mod3_OCP_Console_Project_Create.png[projectCreation]
 
 image::Mod3_OCP_Console_VM_Create.png[VMCreation]
 
+* TBC
+
+-> finish VM creation
+-> add it takes about 10min
+-> show "oc get datavolume"
+-> TIP: use NetApp to host template + CNVC
+-> move on to next module
+

@@ -99,7 +99,7 @@ oc login -u {rosa2_openshift_admin_user} -p {rosa2_openshift_admin_password} {ro
 oc get tver -n trident
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 NAME      VERSION
 trident   25.02.0
@@ -114,7 +114,7 @@ trident   25.02.0
 oc get pods -n trident
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 NAME                                  READY   STATUS    RESTARTS   AGE
 trident-controller-599494bc5f-qnssz   6/6     Running   0          34s
@@ -144,7 +144,7 @@ Verify the installation by viewing the Trident version of the installed operator
 tridentctl -n trident version
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 +----------------+----------------+
 | SERVER VERSION | CLIENT VERSION |
@@ -187,7 +187,7 @@ Verify the secret has been added to the ROSA cluster.
 oc get secrets -n trident dr-backend-fsxn-secret
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 NAME                        TYPE                                  DATA   AGE
 backend-fsxn-secret         Opaque                                2      24h
@@ -385,7 +385,7 @@ Verify the storage class creation.
 oc get sc storage-class-iscsi
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 NAME                   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
 storage-class-iscsi    csi.trident.netapp.io   Delete          Immediate              true                   10s

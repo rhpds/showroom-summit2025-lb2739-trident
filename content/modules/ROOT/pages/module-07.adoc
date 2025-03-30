@@ -131,3 +131,5 @@ As you can see, everything is back! +
 If you connect on your browser to the FQDN provided by the LoadBalancer, you should be able to connect to Wordpress and see the content create in the Module-03.
 
 = Backup/Restore of your VM
+
+TBC
