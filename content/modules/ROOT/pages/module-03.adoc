@@ -8,6 +8,14 @@ In this chapter, you will perform the following tasks:
 [#deploywordpress]
 == Deploy the Wordpress Helm chart
 
+First, you would need to log into the PROD cluster:
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+oc login -u {rosa_openshift_admin_user} -p {rosa_openshift_admin_password} {rosa_openshift_api_url}
+----
+
 Wordpress is widely known as a blogging and content management platform. +
 Let's deploy it on the production cluster with the help of a Helm chart.
 

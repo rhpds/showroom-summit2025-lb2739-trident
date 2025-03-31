@@ -3,30 +3,15 @@
 Trident Protect is installed with a Helm Chart, which makes the experience pretty easy.
 This task is usually performed by the Kubernetes admin.
 
-First, check the current context you are using and switch if required.
+At this point, you already logged in both ROSA clusters. +
+When using the `oc` tool, you can easily switch between clusters, by using the command `oc config use-context`. +
+You can use following to switch to the DR environment:
+
 [.lines_space]
 [.console-input]
 [source,bash]
 ----
-oc config get-contexts
-----
-[.console-output]
-[source,bash]
-----
-CURRENT   NAME                                                                  CLUSTER                                         AUTHINFO                                                      NAMESPACE
-          default/api-dr-gqszb-rpz0-p1-openshiftapps-com:6443/cluster-admin     api-dr-gqszb-rpz0-p1-openshiftapps-com:6443     cluster-admin/api-dr-gqszb-rpz0-p1-openshiftapps-com:6443     default
-*         default/api-prod-gqszb-w9bz-p1-openshiftapps-com:6443/cluster-admin   api-prod-gqszb-w9bz-p1-openshiftapps-com:6443   cluster-admin/api-prod-gqszb-w9bz-p1-openshiftapps-com:6443   default
-----
-[.lines_space]
-[.console-input]
-[source,bash]
-----
-oc config use-context default/api-dr-gqszb-rpz0-p1-openshiftapps-com:6443/cluster-admin
-----
-[.console-output]
-[source,bash]
-----
-Switched to context "default/api-dr-gqszb-rpz0-p1-openshiftapps-com:6443/cluster-admin"
+oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
 ----
 
 Also make sure Trident Protect is not present:
@@ -111,6 +96,7 @@ The admin could create an AppVault used by all possible applications, or create 
 As we have only one bucket available, let's create a single AppVault.
 
 You first need to create two secrets:
+
 * one to host the bucket keys
 * one to host a password for the repository encryption (_optional_)
 
@@ -150,6 +136,7 @@ tridentctl protect get appvault -n trident-protect
 [NOTE] 
 ====
 In a production environment, the administrator may also perform the following tasks:
+
 * create the user namespace
 * create a service account that allows the creation of a Trident Protect application in that namespace
 * grant access to AppVault objects for individual users
