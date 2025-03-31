@@ -175,7 +175,7 @@ metadata:
 type: Opaque
 stringData:
   username: vsadmin
-  password: Rosa12345
+  password: {svm_admin_password}
 EOF
 ----
 
@@ -200,7 +200,7 @@ Let's assign it to a variable.
 
 [source,bash]
 ----
-export SVMIP=$(aws fsx describe-storage-virtual-machines | jq -r '.StorageVirtualMachines[].Endpoints.Management.IpAddresses[]') && echo $SVMIP
+export SVMIP=$(aws fsx describe-storage-virtual-machines | jq -r '.StorageVirtualMachines[].Endpoints.Management.IpAddresses[]' | grep 10.10) && echo $SVMIP
 ----
 
 Run the following commands to create the Trident backend in the ROSA cluster.

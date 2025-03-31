@@ -59,10 +59,12 @@ You first need to connect to the admin page (use the same URL as Wordpress follo
 This will ask for credentials, which you set in the Helm chart (`rosa`/`Rosa12345`).
 
 Once logged in, you need to click on `Posts` in the left bar, and then press on the `Add New Post` button.
+
 image::Mod3_Wordpress_Admin_AddNewPost.png[AddNewPost]
 
 Write Something nice or funny, and when ready press on the two successive `Publish` buttons. +
 In another window, connect to the main page of the Wordpress user site to visualize the result.
+
 image::Mod3_Wordpress_FirstPost.png[FirstPost]
 
 Tadaaaa! +
@@ -75,19 +77,103 @@ Let's look at Virtual Machines.
 * Let's deploy a VM in a new project. +
 For this chapter, most tasks are going to be done in the OpenShift GUI.
 
-Log into OpenShift and create a new project (`myVM` in the example)
+Log into OpenShift and create a new project (`my-vm` in the example)
 
 image::Mod3_OCP_Console_Project_Create.png[projectCreation]
 
-* Navigate to the `VirtualMachines` sub-menu of the `Virtualization` menu, press `Create `Virtual Machine` and then choose `FromTemplate`
+* Navigate to the `VirtualMachines` sub-menu of the `Virtualization` menu, press `Create `Virtual Machine` and then choose `From template`
 
 image::Mod3_OCP_Console_VM_Create.png[VMCreation]
 
-* TBC
+* Select the `Red Hat Enterprise Linux 9 VM` template. This will open a new form.
+* Leave all the parameters with their default value and press `Quick create VirtualMachine`
 
--> finish VM creation
--> add it takes about 10min
--> show "oc get datavolume"
--> TIP: use NetApp to host template + CNVC
--> move on to next module
+image::Mod3_OCP_Console_VM_Form.png[VM Form]
 
+NOTE:
+====
+* Since the iSCSI storage class you creates is the default choice for Virtual Machines, the PVC is going to be created on FSxN
+* You can customize the VM Name if you like
+====
+
+* Verify the objects related to that VM with the CLI
+
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+oc -n my-vm get all,pvc
+----
+[.console-output]
+[source,bash]
+----
+NAME               TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
+service/headless   ClusterIP   None         <none>        5434/TCP   113s
+
+NAME                                              PHASE             PROGRESS   RESTARTS   AGE
+datavolume.cdi.kubevirt.io/rhel9-red-piranha-92   CloneInProgress   28.60%                114s
+
+NAME                                              AGE    STATUS         READY
+virtualmachine.kubevirt.io/rhel9-red-piranha-92   114s   Provisioning   False
+
+NAME                                         STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/rhel9-red-piranha-92   Pending                                      storage-class-iscsi   <unset>                 114s
+----
+As you can see, the PVC is still in `Pending` state... Don't worry, this is expected. +
+The volume template which is used in the example is available in the `gp3` storage class. +
+That is because creating a Virtual Machine involves cloning that PVC to the FSxN system.
+
+You can check the status of that cloning process with the following:
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+oc -n my-vm get datavolume
+----
+[.console-output]
+[source,bash]
+----
+NAME                   PHASE             PROGRESS   RESTARTS   AGE
+rhel9-red-piranha-92   CloneInProgress   46.95%                2m41s
+----
+It takes a few minutes for this clone to finish, at which point, the PVC because visible
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+oc -n my-vm get datavolume
+oc -n my-vm get all,pvc
+----
+[.console-output]
+[source,bash]
+----
+NAME                   PHASE       PROGRESS   RESTARTS   AGE
+rhel9-red-piranha-92   Succeeded   100.0%                7m21s
+
+NAME                                           READY   STATUS    RESTARTS   AGE
+pod/virt-launcher-rhel9-red-piranha-92-d8cf2   1/1     Running   0          3m31s
+
+NAME               TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
+service/headless   ClusterIP   None         <none>        5434/TCP   8m21s
+
+NAME                                              PHASE       PROGRESS   RESTARTS   AGE
+datavolume.cdi.kubevirt.io/rhel9-red-piranha-92   Succeeded   100.0%                8m21s
+
+NAME                                                      AGE     PHASE     IP            NODENAME                                  READY
+virtualmachineinstance.kubevirt.io/rhel9-red-piranha-92   3m31s   Running   10.128.2.41   ip-10-0-9-46.us-east-2.compute.internal   True
+
+NAME                                              AGE     STATUS    READY
+virtualmachine.kubevirt.io/rhel9-red-piranha-92   8m21s   Running   True
+
+NAME                                         STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/rhel9-red-piranha-92   Bound    pvc-6849f5fa-cddb-42a7-89f1-2bcf1b33b891   30Gi       RWX            storage-class-iscsi   <unset>                 8m21s
+----
+You can also see the status of the VM in the Console:
+
+image::Mod3_OCP_Console_VM_Running.png[VM Running]
+
+TIP:
+====
+Using the Trident *Cross Namespace Volume Clone* feature will greatly reduce the PVC creation when creating a new Virtual Machine from a Template. +
+This is thanks to NetApp FlexClone technology, which does not use any storage when starting a volume clone.
+====
