@@ -89,6 +89,16 @@ snapshotrestores.protect.trident.netapp.io             2025-03-17T14:23:58Z
 snapshots.protect.trident.netapp.io                    2025-03-17T14:23:58Z
 ----
 
+Last, you need to install the binary to interact with Trident Protect:
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+curl -L -o tridentctl-protect https://github.com/NetApp/tridentctl-protect/releases/download/25.02.0/tridentctl-protect-linux-amd64
+chmod +x tridentctl-protect
+sudo cp ./tridentctl-protect /usr/local/bin/
+----
+
 [#configureappvault]
 Trident Protect uses a S3 compatible bucket to save the application metadata, as well as the data when a backup is performed. +
 The CR that represent that bucket is called an *_AppVault_*. +
@@ -105,9 +115,9 @@ You first need to create two secrets:
 [source,bash]
 ----
 kubectl create secret generic -n trident-protect aws-s3-keys --from-literal=accessKeyID={aws_access_key_id} --from-literal=secretAccessKey={aws_secret_access_key}
-kubectl create secret generic -n trident-protect appvault-secret --from-literal=KOPIA_PASSWORD=password # <1>
+kubectl create secret generic -n trident-protect appvault-secret --from-literal=KOPIA_PASSWORD=mypassword # <1>
 ----
-<1> replace `password` with something imaginative
+<1> you can replace `mypassword` with something imaginative if you like
 [.console-output]
 [source,bash]
 ----
@@ -120,8 +130,8 @@ You are now ready to proceed with the AppVault creation, which is done in the _t
 [.console-input]
 [source,bash]
 ----
-tridentctl protect create appvault AWS lab-vault --secret aws-s3-keys --bucket {aws_s3_bucket_name} --endpoint {aws_s3_endpoint} --data-mover-password-secret-ref appvault-secret -n trident-protect
-tridentctl protect get appvault -n trident-protect
+tridentctl-protect create appvault AWS lab-vault --secret aws-s3-keys --bucket {s3_bucket_name} --endpoint s3.us-east-2.amazonaws.com --data-mover-password-secret-ref appvault-secret -n trident-protect
+tridentctl-protect get appvault -n trident-protect
 ----
 [.console-output]
 [source,bash]
@@ -136,10 +146,9 @@ tridentctl protect get appvault -n trident-protect
 [NOTE] 
 ====
 In a production environment, the administrator may also perform the following tasks:
-
-* create the user namespace
-* create a service account that allows the creation of a Trident Protect application in that namespace
-* grant access to AppVault objects for individual users
+- Create the user namespace
+- Create a service account that allows the creation of a Trident Protect application in that namespace
+- Grant access to AppVault objects for individual users
 ====
 
 [TIP]

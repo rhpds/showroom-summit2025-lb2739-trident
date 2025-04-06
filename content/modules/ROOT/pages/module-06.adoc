@@ -7,8 +7,12 @@ Check its status from the GUI:
 
 ===> IMAGE
 
-You can now connect to this VM and write some content in the home folder. +
-To do so, 
+You can now connect to this VM and write some content in the _home_ folder. +
+
+NOTE
+====
+Make sure 
+====
 
 ===> IMAGE
 

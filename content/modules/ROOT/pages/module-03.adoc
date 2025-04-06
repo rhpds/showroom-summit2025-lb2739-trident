@@ -60,6 +60,7 @@ persistentvolumeclaim/wordpress                  Bound    pvc-774a516b-2205-462f
 
 Notice the wordpress service ? +
 Copy & paste the address provided by the Load Balancer in your browser in order to access WordPress:
+
 image::Mod3_Wordpress_HelloWorld.png[HelloWorld]
 
 Before protecting that application, you may want to create your own blog. +
@@ -89,7 +90,7 @@ Log into OpenShift and create a new project (`my-vm` in the example)
 
 image::Mod3_OCP_Console_Project_Create.png[projectCreation]
 
-* Navigate to the `VirtualMachines` sub-menu of the `Virtualization` menu, press `Create `Virtual Machine` and then choose `From template`
+* Navigate to the `VirtualMachines` sub-menu of the `Virtualization` menu (make sure you are on the right project), press `Create `Virtual Machine` and then choose `From template`
 
 image::Mod3_OCP_Console_VM_Create.png[VMCreation]
 

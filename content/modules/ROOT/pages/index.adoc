@@ -22,8 +22,9 @@ NOTE: Both Trident and Trident Protect are already installed on the primary clus
 . Module 6 (User persona): 
 .. Configure storage replication for VM workloads
 .. Perform a Failover for VM workloads
-. Module 7 (Bonus) (User persona):
-.. Backup and restore for VM workloads
+. Module 7 (Bonus):
+.. Create a Virtual Machine Template based on the VM created in Module3
+.. Create a Virtual Machine from this new template 
 .. Configure storage replication for container workloads
 .. Perform the Failover and Failback for container workloads
 

@@ -24,7 +24,7 @@ image::Mod2_OCP_Console_OperatorHub_Trident.png[OperatorHub]
 
 image::Mod2_OCP_Console_OperatorHub_Trident_Install.png[Installer]
 
-* Press on the `Install` button which will open the configuration page, leave all the parameters as they are and press `Install`
+* Make sure you are on the most recent version (25.2.1 in the screenshot) and press on the `Install` button which will open the configuration page, leave all the parameters as they are and press `Install`
 
 image::Mod2_OCP_Console_OperatorHub_Trident_Install2.png[Configuration]
 
@@ -102,7 +102,7 @@ oc get tver -n trident
 [source,bash]
 ----
 NAME      VERSION
-trident   25.02.0
+trident   25.02.1
 ----
 
 === Verify that all Trident pods are running
@@ -149,7 +149,7 @@ tridentctl -n trident version
 +----------------+----------------+
 | SERVER VERSION | CLIENT VERSION |
 +----------------+----------------+
-| 25.02.0        | 25.02.1        |
+| 25.02.1       | 25.02.1        |
 +----------------+----------------+
 ----
 
@@ -376,8 +376,6 @@ TIP
 ====
 
 image::Mod2_OCP_Console_Storage_Classes_Create.png[storageclasses]
-====> UPDATE IMAGE
-
 
 Verify the storage class creation.
 [source,bash]
@@ -394,4 +392,3 @@ storage-class-iscsi    csi.trident.netapp.io   Delete          Immediate        
 This is also visible in the OpenShift Console:
 
 image::Mod2_OCP_Console_Storage_Classes.png[storageclasses]
-====> UPDATE IMAGE

@@ -1,5 +1,48 @@
 # Module 7: Bonus
 
+= Create a Virtual Machine Template based on the VM created in Module3
+
+You noticed in Module-3 that creating a Virtual Machine takes some time (around 10 minutes in this case)... +
+When using Trident, you can enable the `Cross Namespace Volume Clone` feature to rapidly create VM from a template. +
+This functionality benefits from the NetApp FlexClone feature, which creates efficient clones, without copying data.
+
+Let's create a new VM Template based on the one you started.
+ 
+metadata:
+  name: primary-pvc
+  namespace: 
+  annotations:
+    trident.netapp.io/cloneToNamespace: .*
+
+= Create a Virtual Machine from this new template 
+
+apiVersion: trident.netapp.io/v1
+kind: TridentVolumeReference
+metadata:
+  name: secondary-pvc
+  namespace: cnvc-secondary
+spec:
+  pvcName: primary-pvc
+  pvcNamespace: cnvc-primary
+
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: secondary-pvc
+  namespace: cnvc-secondary
+  annotations:
+    trident.netapp.io/cloneFromPVC: primary-pvc
+    trident.netapp.io/cloneFromNamespace: cnvc-primary
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: storage-class-iscsi
+
+
 = Disaster Recovery for your Wordpress application
 
 You can follow here the same methodology you applied in the _Module-06_ for the Virtual Machine.
@@ -129,7 +172,3 @@ persistentvolumeclaim/wordpress                  Bound    pvc-774a516b-2205-462f
 
 As you can see, everything is back! +
 If you connect on your browser to the FQDN provided by the LoadBalancer, you should be able to connect to Wordpress and see the content create in the Module-03.
-
-= Backup/Restore of your VM
-
-TBC
