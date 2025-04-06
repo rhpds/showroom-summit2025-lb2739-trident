@@ -306,7 +306,7 @@ However, configuring a RWX workload with a block protocol such as iSCSI requires
 * the storage class must not specifcy any filesystem
 * the PVC must explicitly mention `volumeMode: Block`
 
-You are going to create 3 storage classes:
+You are going to create 2 storage classes:
 
 * `storage-class-nfs`: File workdloads, supports all ROSA access modes
 * `storage-class-iscsi`: Block workloads, also supports all access modes
@@ -392,3 +392,40 @@ storage-class-iscsi    csi.trident.netapp.io   Delete          Immediate        
 This is also visible in the OpenShift Console:
 
 image::Mod2_OCP_Console_Storage_Classes.png[storageclasses]
+
+[#vsclass]
+== Volume Snapshot Class
+
+By default, there is already a Volume Snapshot Class configured for AWS EBS volumes. +
+As Trident Protect relies on Trident to protect applications based configured with FSxN volumes, you also need to create a Volume Snapshot Class that is linked to a Trident driver:
+
+[.lines_space]
+[.console-output]
+[source,yaml]
+----
+cat << EOF | kubectl apply -f -
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: csi-trident-vsc
+driver: csi.trident.netapp.io
+deletionPolicy: Delete
+EOF
+----
+
+You can now verify you have 2 classes available:
+
+[.lines_space]
+[.console-output]
+[source,yaml]
+----
+oc get vsclass
+----
+[.console-output]
+[source,bash]
+----
+oc get vsclass
+NAME              DRIVER                  DELETIONPOLICY   AGE
+csi-aws-vsc       ebs.csi.aws.com         Delete           2d5h
+csi-trident-vsc   csi.trident.netapp.io   Delete           62s
+----

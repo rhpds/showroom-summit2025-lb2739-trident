@@ -106,6 +106,22 @@ tridentctl protect get snap -n wordpress
 +-----------+--------------+-----------+-----+-------+
 ----
 
+As Wordpress has 2 PVC configured, you will find 2 associates CSI Volume Snapshots:
+
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+oc get -n wordpress vs
+----
+[.console-output]
+[source,bash]
+----
+NAME                                                                                     READYTOUSE   SOURCEPVC                  SOURCESNAPSHOTCONTENT   RESTORESIZE   SNAPSHOTCLASS     SNAPSHOTCONTENT                                    CREATIONTIME   AGE
+snapshot-29a85194-428f-4e16-855a-c5ab9f849e3a-pvc-94cc256d-5764-4917-81d9-d4c5cf63f0fc   true         data-wordpress-mariadb-0                           170280Ki      csi-trident-vsc   snapcontent-d1b45c23-6df7-4842-b357-8dc1ac51dfc6   38s            40s
+snapshot-29a85194-428f-4e16-855a-c5ab9f849e3a-pvc-d527a991-4ba3-405a-b533-c22b23d09596   true         wordpress                                          16552Ki       csi-trident-vsc   snapcontent-bec038bf-5d2a-4ea4-8004-5d14089c2a08   40s            40s
+----
+
 [#backup]
 == Create an application backup of your application
 
@@ -140,6 +156,27 @@ tridentctl protect get backup -n wordpress
 ----
 
 NOTE: It is expected for the backup to take more time than the snapshot, as data is also copied
+
+While you wait for the backup to succeed, you can also verify that some content is getting created in the bucket. +
+First, you can notice that Trident Protect created some sub-folders to copy the app metadata as well as the data:
+
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+BUCKETFOLDERS=$(oc -n wordpress get backup wpbkp1 -o=jsonpath='{.status.appArchivePath}' | awk -F '/' '{print $1}')
+aws s3 ls --no-verify-ssl --endpoint-url http://s3.us-east-2.amazonaws.com s3://{s3_bucket_name}/$BUCKETFOLDERS/ --recursive --summarize --human-readable
+----
+Then, you can also parse the content of the backup:
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+BKPPATH=$(oc -n wordpress get backup wpbkp1 -o=jsonpath='{.status.appArchivePath}')
+aws s3 ls --no-verify-ssl --endpoint-url http://s3.us-east-2.amazonaws.com s3://{s3_bucket_name}/$BKPPATH --recursive --summarize --human-readable----
+----
+
+NOTE: You can also browse this bucket from the AWS Console by switching to the AWS S3 category.
 
 [#schedule]
 == Create an protection schedule for your application
