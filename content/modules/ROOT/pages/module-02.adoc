@@ -219,9 +219,9 @@ spec:
   storageDriverName: ontap-nas
   managementLIF: $SVMIP
   nasType: nfs
-  autoExportCIDRs:        # <2>
-  - 10.10.0.0/16
-  autoExportPolicy: true  # <1>
+  #autoExportCIDRs:        # <2>
+  #- 10.10.0.0/16
+  #autoExportPolicy: true  # <1>
   storagePrefix: dr       # <3>
   defaults:
     snapshotDir: 'true'
