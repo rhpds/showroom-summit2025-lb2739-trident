@@ -81,14 +81,15 @@ Your first application is now ready. +
 Let's look at Virtual Machines.
 
 [#deployvm]
-== Deploy a simple VM with an Block RWX volume
+== Deploy a simple VM with a Block RWX volume
 
-* Let's deploy a VM in a new project. +
-For this chapter, most tasks are going to be done in the OpenShift GUI.
+* For this chapter, most tasks are going to be done in the OpenShift GUI. 
 
-Log into the PROD OpenShift cluser and create a new project (`my-vm` in the example):
-* URL: {rosa_openshift_console_url}
-* user/passwod: {rosa_openshift_admin_user} / {rosa_openshift_admin_password}
+* Log into the PROD OpenShift console
+** URL: {rosa_openshift_console_url}
+** user/passwod: {rosa_openshift_admin_user} / {rosa_openshift_admin_password}
+
+* Create a new project (`my-vm` in the example)
 
 image::Mod3_OCP_Console_Project_Create.png[projectCreation]
 
@@ -96,14 +97,19 @@ image::Mod3_OCP_Console_Project_Create.png[projectCreation]
 
 image::Mod3_OCP_Console_VM_Create.png[VMCreation]
 
-* Select the `Red Hat Enterprise Linux 9 VM` template. This will open a new form.
-* Leave all the parameters with their default value and press `Quick create VirtualMachine`
+* Select the `CentOS Stream 9 VM` template. This will open a new form.
+* Set the following parameters:
+** Disk source: `PVC (clone PVC)`
+** PVC project: `openshift-virtualization-os-images`
+** PVC name: `centos-stream9-7ddf038605a5`
+* Press `Quick create VirtualMachine`
 
 image::Mod3_OCP_Console_VM_Form.png[VM Form]
 
 NOTE:
 ====
-* Since the iSCSI storage class you creates is the default choice for Virtual Machines, the PVC is going to be created on FSxN
+* There is no _default_ VM image available on a FSxN volume
+* Since the iSCSI storage class you created is the default choice for Virtual Machines, you have to clone a volume when creating a VM
 * You can customize the VM Name if you like
 ====
 
@@ -113,22 +119,16 @@ NOTE:
 [.console-input]
 [source,bash]
 ----
-oc -n my-vm get all,pvc
+oc -n my-vm get vm,pvc
 ----
 [.console-output]
 [source,bash]
 ----
-NAME               TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
-service/headless   ClusterIP   None         <none>        5434/TCP   113s
+NAME                                                          AGE    STATUS         READY
+virtualmachine.kubevirt.io/centos-stream9-salmon-crayfish-6   114s   Provisioning   False
 
-NAME                                              PHASE             PROGRESS   RESTARTS   AGE
-datavolume.cdi.kubevirt.io/rhel9-red-piranha-92   CloneInProgress   28.60%                114s
-
-NAME                                              AGE    STATUS         READY
-virtualmachine.kubevirt.io/rhel9-red-piranha-92   114s   Provisioning   False
-
-NAME                                         STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
-persistentvolumeclaim/rhel9-red-piranha-92   Pending                                      storage-class-iscsi   <unset>                 114s
+NAME                                                STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/centos-stream9-black-rat-76   Pending                                      storage-class-iscsi   <unset>                 114s
 ----
 As you can see, the PVC is still in `Pending` state... Don't worry, this is expected. +
 The volume template which is used in the example is available in the `gp3` storage class. +
@@ -144,40 +144,27 @@ oc -n my-vm get datavolume
 [.console-output]
 [source,bash]
 ----
-NAME                   PHASE             PROGRESS   RESTARTS   AGE
-rhel9-red-piranha-92   CloneInProgress   46.95%                2m41s
+NAME                               PHASE             PROGRESS   RESTARTS   AGE
+centos-stream9-salmon-crayfish-6   CloneInProgress   46.95%                2m41s
 ----
 It takes a few minutes for this clone to finish, at which point, the PVC because visible
 [.lines_space]
 [.console-input]
 [source,bash]
 ----
-oc -n my-vm get datavolume
-oc -n my-vm get all,pvc
+oc -n my-vm get datavolume,vm,pvc
 ----
 [.console-output]
 [source,bash]
 ----
-NAME                   PHASE       PROGRESS   RESTARTS   AGE
-rhel9-red-piranha-92   Succeeded   100.0%                7m21s
+NAME                                                          PHASE       PROGRESS   RESTARTS   AGE
+datavolume.cdi.kubevirt.io/centos-stream9-salmon-crayfish-6   Succeeded   100.0%                7m21s
 
-NAME                                           READY   STATUS    RESTARTS   AGE
-pod/virt-launcher-rhel9-red-piranha-92-d8cf2   1/1     Running   0          3m31s
+NAME                                                          AGE     STATUS    READY
+virtualmachine.kubevirt.io/centos-stream9-salmon-crayfish-6   8m21s   Running   True
 
-NAME               TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
-service/headless   ClusterIP   None         <none>        5434/TCP   8m21s
-
-NAME                                              PHASE       PROGRESS   RESTARTS   AGE
-datavolume.cdi.kubevirt.io/rhel9-red-piranha-92   Succeeded   100.0%                8m21s
-
-NAME                                                      AGE     PHASE     IP            NODENAME                                  READY
-virtualmachineinstance.kubevirt.io/rhel9-red-piranha-92   3m31s   Running   10.128.2.41   ip-10-0-9-46.us-east-2.compute.internal   True
-
-NAME                                              AGE     STATUS    READY
-virtualmachine.kubevirt.io/rhel9-red-piranha-92   8m21s   Running   True
-
-NAME                                         STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
-persistentvolumeclaim/rhel9-red-piranha-92   Bound    pvc-6849f5fa-cddb-42a7-89f1-2bcf1b33b891   30Gi       RWX            storage-class-iscsi   <unset>                 8m21s
+NAME                                                STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/centos-stream9-black-rat-76   Bound    pvc-6849f5fa-cddb-42a7-89f1-2bcf1b33b891   30Gi       RWX            storage-class-iscsi   <unset>                 8m21s
 ----
 You can also see the status of the VM in the Console:
 

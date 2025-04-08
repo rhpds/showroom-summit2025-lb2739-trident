@@ -221,13 +221,10 @@ spec:
   storageDriverName: ontap-nas
   managementLIF: $SVMIP
   nasType: nfs
-  #autoExportCIDRs:        # <2>
-  #- 10.10.0.0/16
-  #autoExportPolicy: true  # <1>
-  storagePrefix: dr       # <3>
+  storagePrefix: dr       # <1>
   defaults:
     snapshotDir: 'true'
-    nameTemplate: "{{ .config.StoragePrefix }}_{{ .volume.Namespace }}_{{ .volume.RequestName }}"  # <4>
+    nameTemplate: "{{ .config.StoragePrefix }}_{{ .volume.Namespace }}_{{ .volume.RequestName }}"  # <2>
   credentials:
     name: dr-backend-fsxn-secret
 EOF
@@ -235,10 +232,8 @@ EOF
 
 Some explanations about the content of that manifest:
 
-<1> `autoExportPolicy`: lets Trident dynamically manage the NFS export policies in AWS FSXN by setting one rule per ROSA node
-<2> `autoExportCIDRs`: list of CIDRs to filter ROSA's nodes IP addresses against
-<3> `storagePrefix`: all volumes created by Trident will start with those letters
-<4> `nameTemplate`: all volumes created by Trident will follow that naming convention (instead of using the PV UUID)
+<1> `storagePrefix`: all volumes created by Trident will start with those letters
+<2> `nameTemplate`: all volumes created by Trident will follow that naming convention (instead of using the PV UUID)
 
 Verify the backend configuration.
 
@@ -271,8 +266,9 @@ spec:
   version: 1
   backendName: dr-fsxn-iscsi
   storageDriverName: ontap-san
-  managementLIF: 10.0.63.80
+  managementLIF: $SVMIP
   sanType: iscsi
+  storagePrefix: dr
   credentials:
     name: dr-backend-fsxn-secret
 EOF
