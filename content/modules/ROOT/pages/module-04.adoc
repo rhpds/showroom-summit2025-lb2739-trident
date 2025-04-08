@@ -103,6 +103,7 @@ sudo cp ./tridentctl-protect /usr/local/bin/
 [#configureappvault]
 Trident Protect uses a S3 compatible bucket to save the application metadata, as well as the data when a backup is performed. +
 The CR that represent that bucket is called an *_AppVault_*. +
+
 The admin could create an AppVault used by all possible applications, or create specific ones per application (in which case you would have multiple buckets). +
 As we have only one bucket available, let's create a single AppVault.
 
@@ -119,6 +120,7 @@ kubectl create secret generic -n trident-protect aws-s3-keys --from-literal=acce
 kubectl create secret generic -n trident-protect appvault-secret --from-literal=KOPIA_PASSWORD=mypassword # <1>
 ----
 <1> you can replace `mypassword` with something imaginative if you like
+
 [.console-output]
 [source,bash]
 ----
