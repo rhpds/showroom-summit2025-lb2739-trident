@@ -11,7 +11,7 @@ In this chapter, you will perform the following tasks:
 First, you would need to log into the PROD cluster:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute,subs="attributes"]
 ----
 oc login -u {rosa_openshift_admin_user} -p {rosa_openshift_admin_password} {rosa_openshift_api_url}
 ----

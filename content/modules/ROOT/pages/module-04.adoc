@@ -114,7 +114,7 @@ You first need to create two secrets:
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute,subs="attributes"]
 ----
 kubectl create secret generic -n trident-protect aws-s3-keys --from-literal=accessKeyID={aws_access_key_id} --from-literal=secretAccessKey={aws_secret_access_key}
 kubectl create secret generic -n trident-protect appvault-secret --from-literal=KOPIA_PASSWORD=mypassword # <1>
@@ -131,7 +131,7 @@ secret/appvault-secret created
 You are now ready to proceed with the AppVault creation, which is done in the _trident-protect_ namespace.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute,subs="attributes"]
 ----
 tridentctl-protect create appvault AWS lab-vault --secret aws-s3-keys --bucket {s3_bucket_name} --endpoint s3.us-east-2.amazonaws.com --data-mover-password-secret-ref appvault-secret -n trident-protect
 tridentctl-protect get appvault -n trident-protect

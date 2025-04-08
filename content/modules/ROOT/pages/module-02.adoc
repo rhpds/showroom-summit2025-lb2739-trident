@@ -89,7 +89,7 @@ To authenticate `oc` use the API URL, username, and password provided by the RHD
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute,subs="attributes"]
 ----
 oc login -u {rosa2_openshift_admin_user} -p {rosa2_openshift_admin_password} {rosa2_openshift_api_url}
 ----
@@ -171,7 +171,7 @@ Let's use the cli:
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute,subs="attributes"]
 ----
 cat << EOF | oc apply -f -
 apiVersion: v1
