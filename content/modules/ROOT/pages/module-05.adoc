@@ -273,9 +273,7 @@ While protection is done for the whole application, restoring an application off
 * You can restore your application *in-place* or in a *different namespace* (same cluster or a different cluster)
 * You can even tailor the restore with a *post-restore hook*
 
-TBC TBC TBC TBC TBC
-=> destroy app or just restore on DR
-=> OCP context in the console
+Let's perform a full restore on the DR cluster! 
 
 First step, make sure you are connected on the DR context:
 [.lines_space]
@@ -285,9 +283,7 @@ First step, make sure you are connected on the DR context:
 oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
 ----
 
-Let's perform a full restore on the DR cluster! 
-
-For this, you first need to find out the full path of your backup in the bucket. +
+You first need to find out the full path of your backup in the bucket. +
 From the console, run the 2 following commands to browse the AppVault:
 [.lines_space]
 [.console-input]
@@ -383,3 +379,5 @@ Copy and paste it in your browser and check the content of the blog.
 
 Tadaaaaa! Your great blog is back online! +
 You just managed to restore your whole application on a different cluster from the object store.
+
+You are now done with this module. Please proceed with the next one.

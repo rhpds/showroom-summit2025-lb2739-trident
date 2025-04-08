@@ -147,7 +147,8 @@ oc -n my-vm get datavolume
 NAME                               PHASE             PROGRESS   RESTARTS   AGE
 centos-stream9-salmon-crayfish-6   CloneInProgress   46.95%                2m41s
 ----
-It takes a few minutes for this clone to finish, at which point, the PVC because visible
+
+* It takes a few minutes for this clone to finish, at which point, the PVC because visible
 [.lines_space]
 [.console-input]
 [source,bash]
@@ -166,7 +167,7 @@ virtualmachine.kubevirt.io/centos-stream9-salmon-crayfish-6   8m21s   Running   
 NAME                                                STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
 persistentvolumeclaim/centos-stream9-black-rat-76   Bound    pvc-6849f5fa-cddb-42a7-89f1-2bcf1b33b891   30Gi       RWX            storage-class-iscsi   <unset>                 8m21s
 ----
-You can also see the status of the VM in the Console:
+* You can also see the status of the VM in the Console:
 
 image::Mod3_OCP_Console_VM_Running.png[VM Running]
 
@@ -175,3 +176,19 @@ TIP:
 Using the Trident *Cross Namespace Volume Clone* feature will greatly reduce the PVC creation when creating a new Virtual Machine from a Template. +
 This is thanks to NetApp FlexClone technology, which does not use any storage when starting a volume clone.
 ====
+
+* Now that the Virtual Machine is running, you can start adding some content. Press the `Open Web console` link (you can see in the previous screenshot under the miniature CentOS window)
+* This opens a new window. First Press on the `Guest login credentials` link, and use the information you see to log into the system
+
+image::Mod3_OCP_Console_CentOS_console.png[CentOS console]
+
+* Create a file in the home directly
+
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+echo "this is my file" > myfile.txt
+----
+
+* You are now done with this module. Please proceed with the next one.
