@@ -89,7 +89,8 @@ snapshotrestores.protect.trident.netapp.io             2025-03-17T14:23:58Z
 snapshots.protect.trident.netapp.io                    2025-03-17T14:23:58Z
 ----
 
-Last, you need to install the binary to interact with Trident Protect:
+Last, you need to install the binary to interact with Trident Protect. +
+You are going to need the root password for the `sudo` command: {ssh_password}
 [.lines_space]
 [.console-input]
 [source,bash]

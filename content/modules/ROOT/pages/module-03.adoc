@@ -106,7 +106,7 @@ image::Mod3_OCP_Console_VM_Create.png[VMCreation]
 
 image::Mod3_OCP_Console_VM_Form.png[VM Form]
 
-NOTE:
+[NOTE]:
 ====
 * There is no _default_ VM image available on a FSxN volume
 * Since the iSCSI storage class you created is the default choice for Virtual Machines, you have to clone a volume when creating a VM
@@ -171,7 +171,7 @@ persistentvolumeclaim/centos-stream9-black-rat-76   Bound    pvc-6849f5fa-cddb-4
 
 image::Mod3_OCP_Console_VM_Running.png[VM Running]
 
-TIP:
+[TIP]:
 ====
 Using the Trident *Cross Namespace Volume Clone* feature will greatly reduce the PVC creation when creating a new Virtual Machine from a Template. +
 This is thanks to NetApp FlexClone technology, which does not use any storage when starting a volume clone.
