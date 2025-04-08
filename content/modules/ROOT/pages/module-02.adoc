@@ -87,6 +87,8 @@ The bastion provided with the RHDP workshop has the `aws` and `rosa` command lin
 
 To authenticate `oc` use the API URL, username, and password provided by the RHDP lab deployment.
 
+[.lines_space]
+[.console-input]
 [source,bash]
 ----
 oc login -u {rosa2_openshift_admin_user} -p {rosa2_openshift_admin_password} {rosa2_openshift_api_url}
