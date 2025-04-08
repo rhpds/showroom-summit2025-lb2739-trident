@@ -8,12 +8,20 @@ In this chapter, you will perform the following tasks:
 [#deploywordpress]
 == Deploy the Wordpress Helm chart
 
+First, you would need to log into the PROD cluster:
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+oc login -u {rosa_openshift_admin_user} -p {rosa_openshift_admin_password} {rosa_openshift_api_url}
+----
+
 Wordpress is widely known as a blogging and content management platform. +
 Let's deploy it on the production cluster with the help of a Helm chart.
 
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 helm repo add bitnami https://charts.bitnami.com/bitnami
 
@@ -29,12 +37,12 @@ NOTE: It takes a tiny bit more than a minute for the installation to complete.
 Check the content of the `wordpress` namespace.
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get -n wordpress svc,po,pvc
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 NAME                                 TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)                      AGE
 service/wordpress                    LoadBalancer   172.30.57.162    aa7ccfdb52de24e73867ae11c11bedc0-1849430877.us-east-2.elb.amazonaws.com   80:30087/TCP,443:32446/TCP   10m
@@ -52,24 +60,135 @@ persistentvolumeclaim/wordpress                  Bound    pvc-774a516b-2205-462f
 
 Notice the wordpress service ? +
 Copy & paste the address provided by the Load Balancer in your browser in order to access WordPress:
-image::Wordpress_HelloWorld.png[HelloWorld]
+
+image::Mod3_Wordpress_HelloWorld.png[HelloWorld]
 
 Before protecting that application, you may want to create your own blog. +
 You first need to connect to the admin page (use the same URL as Wordpress followed by "/wp-admin"). +
 This will ask for credentials, which you set in the Helm chart (`rosa`/`Rosa12345`).
 
 Once logged in, you need to click on `Posts` in the left bar, and then press on the `Add New Post` button.
-image::Wordpress_Admin_AddNewPost.png[AddNewPost]
+
+image::Mod3_Wordpress_Admin_AddNewPost.png[AddNewPost]
 
 Write Something nice or funny, and when ready press on the two successive `Publish` buttons. +
 In another window, connect to the main page of the Wordpress user site to visualize the result.
-image::Wordpress_FirstPost.png[FirstPost]
+
+image::Mod3_Wordpress_FirstPost.png[FirstPost]
 
 Tadaaaa! +
 Your first application is now ready. +
 Let's look at Virtual Machines.
 
 [#deployvm]
-== Deploy a simple VM an iSCSI volume
+== Deploy a simple VM with a Block RWX volume
 
-TBD
+* For this chapter, most tasks are going to be done in the OpenShift GUI. 
+
+* Log into the PROD OpenShift console
+** URL: {rosa_openshift_console_url}
+** user/passwod: {rosa_openshift_admin_user} / {rosa_openshift_admin_password}
+
+* Create a new project (`my-vm` in the example)
+
+image::Mod3_OCP_Console_Project_Create.png[projectCreation]
+
+* Navigate to the `VirtualMachines` sub-menu of the `Virtualization` menu (make sure you are on the right project), press `Create `Virtual Machine` and then choose `From template`
+
+image::Mod3_OCP_Console_VM_Create.png[VMCreation]
+
+* Select the `CentOS Stream 9 VM` template. This will open a new form.
+* Set the following parameters:
+** Disk source: `PVC (clone PVC)`
+** PVC project: `openshift-virtualization-os-images`
+** PVC name: `centos-stream9-7ddf038605a5`
+* Press `Quick create VirtualMachine`
+
+image::Mod3_OCP_Console_VM_Form.png[VM Form]
+
+NOTE:
+====
+* There is no _default_ VM image available on a FSxN volume
+* Since the iSCSI storage class you created is the default choice for Virtual Machines, you have to clone a volume when creating a VM
+* You can customize the VM Name if you like
+====
+
+* Verify the objects related to that VM with the CLI
+
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+oc -n my-vm get vm,pvc
+----
+[.console-output]
+[source,bash]
+----
+NAME                                                          AGE    STATUS         READY
+virtualmachine.kubevirt.io/centos-stream9-salmon-crayfish-6   114s   Provisioning   False
+
+NAME                                                STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/centos-stream9-black-rat-76   Pending                                      storage-class-iscsi   <unset>                 114s
+----
+As you can see, the PVC is still in `Pending` state... Don't worry, this is expected. +
+The volume template which is used in the example is available in the `gp3` storage class. +
+That is because creating a Virtual Machine involves cloning that PVC to the FSxN system.
+
+You can check the status of that cloning process with the following:
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+oc -n my-vm get datavolume
+----
+[.console-output]
+[source,bash]
+----
+NAME                               PHASE             PROGRESS   RESTARTS   AGE
+centos-stream9-salmon-crayfish-6   CloneInProgress   46.95%                2m41s
+----
+
+* It takes a few minutes for this clone to finish, at which point, the PVC because visible
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+oc -n my-vm get datavolume,vm,pvc
+----
+[.console-output]
+[source,bash]
+----
+NAME                                                          PHASE       PROGRESS   RESTARTS   AGE
+datavolume.cdi.kubevirt.io/centos-stream9-salmon-crayfish-6   Succeeded   100.0%                7m21s
+
+NAME                                                          AGE     STATUS    READY
+virtualmachine.kubevirt.io/centos-stream9-salmon-crayfish-6   8m21s   Running   True
+
+NAME                                                STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/centos-stream9-black-rat-76   Bound    pvc-6849f5fa-cddb-42a7-89f1-2bcf1b33b891   30Gi       RWX            storage-class-iscsi   <unset>                 8m21s
+----
+* You can also see the status of the VM in the Console:
+
+image::Mod3_OCP_Console_VM_Running.png[VM Running]
+
+TIP:
+====
+Using the Trident *Cross Namespace Volume Clone* feature will greatly reduce the PVC creation when creating a new Virtual Machine from a Template. +
+This is thanks to NetApp FlexClone technology, which does not use any storage when starting a volume clone.
+====
+
+* Now that the Virtual Machine is running, you can start adding some content. Press the `Open Web console` link (you can see in the previous screenshot under the miniature CentOS window)
+* This opens a new window. First Press on the `Guest login credentials` link, and use the information you see to log into the system
+
+image::Mod3_OCP_Console_CentOS_console.png[CentOS console]
+
+* Create a file in the home directly
+
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+echo "this is my file" > myfile.txt
+----
+
+* You are now done with this module. Please proceed with the next one.

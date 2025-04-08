@@ -6,6 +6,7 @@
 ** xref:module-02.adoc#tridentinstalled[Verify Trident installation]
 ** xref:module-02.adoc#tridentconfiguration[Configure Trident]
 ** xref:module-02.adoc#storageclasses[Configure Storage Classes]
+** xref:module-02.adoc#vsclass[Configure Volume Snapshot Class]
 
 * xref:module-03.adoc[Provision workloads]
 ** xref:module-03.adoc#deploywordpress[Install Wordpress with Helm]

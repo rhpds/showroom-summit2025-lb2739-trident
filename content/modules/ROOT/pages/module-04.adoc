@@ -3,41 +3,26 @@
 Trident Protect is installed with a Helm Chart, which makes the experience pretty easy.
 This task is usually performed by the Kubernetes admin.
 
-First, check the current context you are using and switch if required.
+At this point, you already logged in both ROSA clusters. +
+When using the `oc` tool, you can easily switch between clusters, by using the command `oc config use-context`. +
+You can use following to switch to the DR environment:
+
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
-kubectl config get-contexts
-----
-[.console-output]
-[source,bash,subs="+macros,+attributes"]
-----
-CURRENT   NAME                          CLUSTER      AUTHINFO           NAMESPACE
-          kub2-admin@kub2               kub2         kub2-admin
-*         kubernetes-admin@kubernetes   kubernetes   kubernetes-admin
-----
-[.lines_space]
-[.console-input]
-[source,bash,role=execute,subs="attributes"]
-----
-kubectl config use-context kub2-admin@kub2
-----
-[.console-output]
-[source,bash,subs="+macros,+attributes"]
-----
-Switched to context "kub2-admin@kub2"
+oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
 ----
 
 Also make sure Trident Protect is not present:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get ns trident-protect
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 Error from server (NotFound): namespaces "trident-protect" not found
 ----
@@ -46,7 +31,7 @@ Error from server (NotFound): namespaces "trident-protect" not found
 You are now ready to proceed:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 helm repo add netapp-trident-protect https://netapp.github.io/trident-protect-helm-chart/
 oc create ns trident-protect
@@ -57,12 +42,12 @@ helm install trident-protect netapp-trident-protect/trident-protect --set cluste
 If everything well, you should find a new POD in the _trident-protect_ namespace:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get po -n trident-protect
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 NAME                                                           READY   STATUS    RESTARTS   AGE
 trident-protect-controller-manager-7cdff78665-brjxk            2/2     Running   0          30s
@@ -70,12 +55,12 @@ trident-protect-controller-manager-7cdff78665-brjxk            2/2     Running  
 There are also a whole list of CRD installed with Trident Protect:
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 oc get crd | grep protect
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 applications.protect.trident.netapp.io                 2025-03-17T14:23:58Z
 appmirrorrelationships.protect.trident.netapp.io       2025-03-17T14:23:58Z
@@ -104,6 +89,16 @@ snapshotrestores.protect.trident.netapp.io             2025-03-17T14:23:58Z
 snapshots.protect.trident.netapp.io                    2025-03-17T14:23:58Z
 ----
 
+Last, you need to install the binary to interact with Trident Protect:
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+curl -L -o tridentctl-protect https://github.com/NetApp/tridentctl-protect/releases/download/25.02.0/tridentctl-protect-linux-amd64
+chmod +x tridentctl-protect
+sudo cp ./tridentctl-protect /usr/local/bin/
+----
+
 [#configureappvault]
 Trident Protect uses a S3 compatible bucket to save the application metadata, as well as the data when a backup is performed. +
 The CR that represent that bucket is called an *_AppVault_*. +
@@ -111,19 +106,20 @@ The admin could create an AppVault used by all possible applications, or create 
 As we have only one bucket available, let's create a single AppVault.
 
 You first need to create two secrets:
+
 * one to host the bucket keys
 * one to host a password for the repository encryption (_optional_)
 
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
 kubectl create secret generic -n trident-protect aws-s3-keys --from-literal=accessKeyID={aws_access_key_id} --from-literal=secretAccessKey={aws_secret_access_key}
-kubectl create secret generic -n trident-protect appvault-secret --from-literal=KOPIA_PASSWORD=password # <1>
+kubectl create secret generic -n trident-protect appvault-secret --from-literal=KOPIA_PASSWORD=mypassword # <1>
 ----
-<1> replace `password` with something imaginative
+<1> you can replace `mypassword` with something imaginative if you like
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
 secret/aws-s3-keys created
 secret/appvault-secret created
@@ -132,27 +128,27 @@ secret/appvault-secret created
 You are now ready to proceed with the AppVault creation, which is done in the _trident-protect_ namespace.
 [.lines_space]
 [.console-input]
-[source,bash,role=execute,subs="attributes"]
+[source,bash]
 ----
-tridentctl protect create appvault AWS lab-vault --secret aws-s3-keys --bucket {aws_s3_bucket_name} --endpoint {aws_s3_endpoint} --data-mover-password-secret-ref appvault-secret -n trident-protect
-tridentctl protect get appvault -n trident-protect
+tridentctl-protect create appvault AWS lab-vault --secret aws-s3-keys --bucket {s3_bucket_name} --endpoint s3.us-east-2.amazonaws.com --data-mover-password-secret-ref appvault-secret -n trident-protect
+tridentctl-protect get appvault -n trident-protect
 ----
 [.console-output]
-[source,bash,subs="+macros,+attributes"]
+[source,bash]
 ----
-+--------------+----------+-----------+------+-------+
-|     NAME     | PROVIDER |   STATE   | AGE  | ERROR |
-+--------------+----------+-----------+------+-------+
-|   lab-vault  |   AWS    | Available |   1m |       |
-+--------------+----------+-----------+------+-------+
++-----------+----------+-----------+-------+---------+-----+
+|   NAME    | PROVIDER |   STATE   | ERROR | MESSAGE | AGE |
++-----------+----------+-----------+-------+---------+-----+
+| lab-vault | AWS      | Available |       |         | 2s  |
++-----------+----------+-----------+-------+---------+-----+
 ----
 
 [NOTE] 
 ====
 In a production environment, the administrator may also perform the following tasks:
-* create the user namespace
-* create a service account that allows the creation of a Trident Protect application in that namespace
-* grant access to AppVault objects for individual users
+- Create the user namespace
+- Create a service account that allows the creation of a Trident Protect application in that namespace
+- Grant access to AppVault objects for individual users
 ====
 
 [TIP]
@@ -163,3 +159,5 @@ Trident Protect will take care of copying the application metadata between both 
 
 As we are going to run the whole lab as an admin, those 3 tasks are not covered.
 For further details on access control, please refer to this https://docs.netapp.com/us-en/trident/trident-protect/manage-authorization-access-control.html[link]
+
+You are now done with this module. Please proceed with the next one.
