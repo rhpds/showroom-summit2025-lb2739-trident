@@ -89,7 +89,8 @@ snapshotrestores.protect.trident.netapp.io             2025-03-17T14:23:58Z
 snapshots.protect.trident.netapp.io                    2025-03-17T14:23:58Z
 ----
 
-Last, you need to install the binary to interact with Trident Protect:
+Last, you need to install the binary to interact with Trident Protect. +
+You are going to need the root password for the `sudo` command: {ssh_password}
 [.lines_space]
 [.console-input]
 [source,bash]
@@ -102,6 +103,7 @@ sudo cp ./tridentctl-protect /usr/local/bin/
 [#configureappvault]
 Trident Protect uses a S3 compatible bucket to save the application metadata, as well as the data when a backup is performed. +
 The CR that represent that bucket is called an *_AppVault_*. +
+
 The admin could create an AppVault used by all possible applications, or create specific ones per application (in which case you would have multiple buckets). +
 As we have only one bucket available, let's create a single AppVault.
 
@@ -112,12 +114,13 @@ You first need to create two secrets:
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute,subs="attributes"]
 ----
 kubectl create secret generic -n trident-protect aws-s3-keys --from-literal=accessKeyID={aws_access_key_id} --from-literal=secretAccessKey={aws_secret_access_key}
 kubectl create secret generic -n trident-protect appvault-secret --from-literal=KOPIA_PASSWORD=mypassword # <1>
 ----
 <1> you can replace `mypassword` with something imaginative if you like
+
 [.console-output]
 [source,bash]
 ----
@@ -128,7 +131,7 @@ secret/appvault-secret created
 You are now ready to proceed with the AppVault creation, which is done in the _trident-protect_ namespace.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute,subs="attributes"]
 ----
 tridentctl-protect create appvault AWS lab-vault --secret aws-s3-keys --bucket {s3_bucket_name} --endpoint s3.us-east-2.amazonaws.com --data-mover-password-secret-ref appvault-secret -n trident-protect
 tridentctl-protect get appvault -n trident-protect

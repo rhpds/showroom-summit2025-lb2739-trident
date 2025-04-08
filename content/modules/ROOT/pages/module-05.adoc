@@ -78,7 +78,7 @@ An application snapshot is composed of several steps:
 
 [NOTE]
 ====
-Hooks are not covered here in this lab.
+Hooks are not covered here in this lab. +
 You can find examples on this repo: https://github.com/NetApp/Verda
 ====
 
