@@ -86,9 +86,9 @@ Let's look at Virtual Machines.
 * For this chapter, most tasks are going to be done in the OpenShift GUI. 
 
 * Log into the PROD OpenShift console
-** URL: {rosa_openshift_console_url}
-** user: {rosa_openshift_admin_user}
-** password: {rosa_openshift_admin_password}
+** *URL*: {rosa_openshift_console_url}
+** *user*: {rosa_openshift_admin_user}
+** *password*: {rosa_openshift_admin_password}
 
 * Create a new project (`my-vm` in the example)
 
@@ -107,7 +107,7 @@ image::Mod3_OCP_Console_VM_Create.png[VMCreation]
 
 image::Mod3_OCP_Console_VM_Form.png[VM Form]
 
-[NOTE]:
+[NOTE]
 ====
 * There is no _default_ VM image available on a FSxN volume
 * Since the iSCSI storage class you created is the default choice for Virtual Machines, you have to clone a volume when creating a VM
