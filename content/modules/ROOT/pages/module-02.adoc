@@ -14,7 +14,9 @@ You will use that method in this lab.
 [#operatorinstall]
 == Install the NetApp Trident Operator
 
-* Connect to the RedHat OpenShift GUI on the secondary cluster
+* Connect to the RedHat OpenShift GUI on the secondary cluster:
+** URL: {rosa2_openshift_console_url}
+** user/passwod: {rosa2_openshift_admin_user} / {rosa2_openshift_admin_password}
 * Locate the *OperatorHub* sub-menu in the *Operators* category
 * Filter on *trident*
 

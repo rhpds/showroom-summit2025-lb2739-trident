@@ -86,7 +86,9 @@ Let's look at Virtual Machines.
 * Let's deploy a VM in a new project. +
 For this chapter, most tasks are going to be done in the OpenShift GUI.
 
-Log into OpenShift and create a new project (`my-vm` in the example)
+Log into the PROD OpenShift cluser and create a new project (`my-vm` in the example):
+* URL: {rosa_openshift_console_url}
+* user/passwod: {rosa_openshift_admin_user} / {rosa_openshift_admin_password}
 
 image::Mod3_OCP_Console_Project_Create.png[projectCreation]
 
