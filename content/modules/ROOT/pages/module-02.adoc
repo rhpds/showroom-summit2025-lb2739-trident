@@ -395,6 +395,8 @@ allowVolumeExpansion: true
 image::Mod2_OCP_Console_Storage_Classes_Create.png[storageclasses]
 
 Verify the storage class creation.
+[.lines_space]
+[.console-input]
 [source,bash]
 ----
 oc get sc storage-class-iscsi

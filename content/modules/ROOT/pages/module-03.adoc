@@ -87,7 +87,8 @@ Let's look at Virtual Machines.
 
 * Log into the PROD OpenShift console
 ** URL: {rosa_openshift_console_url}
-** user/passwod: {rosa_openshift_admin_user} / {rosa_openshift_admin_password}
+** user: {rosa_openshift_admin_user}
+** password: {rosa_openshift_admin_password}
 
 * Create a new project (`my-vm` in the example)
 
@@ -139,7 +140,7 @@ You can check the status of that cloning process with the following:
 [.console-input]
 [source,bash]
 ----
-oc -n my-vm get datavolume
+oc get datavolume -n my-vm 
 ----
 [.console-output]
 [source,bash]
@@ -149,11 +150,12 @@ centos-stream9-salmon-crayfish-6   CloneInProgress   46.95%                2m41s
 ----
 
 * It takes a few minutes for this clone to finish, at which point, the PVC because visible
+
 [.lines_space]
 [.console-input]
 [source,bash]
 ----
-oc -n my-vm get datavolume,vm,pvc
+oc get datavolume,vm,pvc -n my-vm 
 ----
 [.console-output]
 [source,bash]
@@ -171,7 +173,7 @@ persistentvolumeclaim/centos-stream9-black-rat-76   Bound    pvc-6849f5fa-cddb-4
 
 image::Mod3_OCP_Console_VM_Running.png[VM Running]
 
-[TIP]:
+[TIP]
 ====
 Using the Trident *Cross Namespace Volume Clone* feature will greatly reduce the PVC creation when creating a new Virtual Machine from a Template. +
 This is thanks to NetApp FlexClone technology, which does not use any storage when starting a volume clone.
