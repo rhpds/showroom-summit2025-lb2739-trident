@@ -2,19 +2,19 @@
 
 == Virtual Machine customization
 
-The Virtual Machine should be up&running by now. +
-Check its status from the GUI:
+* Now that the Virtual Machine is running, you can start adding some content. Press the `Open Web console` link (you can see in the previous screenshot under the miniature CentOS window)
+* This opens a new window. First Press on the `Guest login credentials` link, and use the information you see to log into the system
 
-===> IMAGE
+image::Mod6_OCP_Console_CentOS_console.png[CentOS console]
 
-You can now connect to this VM and write some content in the _home_ folder. +
+* Create a file in the home directly
 
-NOTE
-====
-Make sure 
-====
-
-===> IMAGE
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+echo "this is my file" > myfile.txt
+----
 
 == DR Setup
 

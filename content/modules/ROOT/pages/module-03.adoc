@@ -111,19 +111,6 @@ Using the Trident *Cross Namespace Volume Clone* feature will greatly reduce the
 This is thanks to NetApp FlexClone technology, which does not use any storage when starting a volume clone.
 ====
 
-* Now that the Virtual Machine is running, you can start adding some content. Press the `Open Web console` link (you can see in the previous screenshot under the miniature CentOS window)
-* This opens a new window. First Press on the `Guest login credentials` link, and use the information you see to log into the system
-
-image::Mod3_OCP_Console_CentOS_console.png[CentOS console]
-
-* Create a file in the home directly
-
-[.lines_space]
-[.console-input]
-[source,bash]
-----
-echo "this is my file" > myfile.txt
-----
 
 [#deploywordpress]
 == Deploy the Wordpress Helm chart
