@@ -117,9 +117,9 @@ You first need to create two secrets:
 [source,bash,role=execute,subs="attributes"]
 ----
 kubectl create secret generic -n trident-protect aws-s3-keys --from-literal=accessKeyID={aws_access_key_id} --from-literal=secretAccessKey={aws_secret_access_key}
-kubectl create secret generic -n trident-protect appvault-secret --from-literal=KOPIA_PASSWORD=mypassword # <1>
+kubectl create secret generic -n trident-protect appvault-secret --from-literal=KOPIA_PASSWORD=mypassword
 ----
-CAUTION: <1> Please do not change that password as the same bucket is used for both production and DR environments, and since the AppVault is already configured on the production environment
+CAUTION: Please *_do not_* change that password as the same bucket is used for both production and DR environments, and since the AppVault is already configured on the production environment
 
 [.console-output]
 [source,bash]
