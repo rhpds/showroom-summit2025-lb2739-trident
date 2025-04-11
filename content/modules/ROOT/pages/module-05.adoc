@@ -5,7 +5,8 @@ Trident Protect can help you protect *applications*.
 Now, what *_IS_* an application? How do you *_DEFINE_* it? +
 Very philosophical questions, isn't it?
 
-10 people may have 10 different answers. +
+10 people may have 10 different answers. 
+
 With Trident Protect, you can define applications in multiple ways:
 
 * with *Labels* (ie subset of a namespace)
@@ -14,7 +15,7 @@ With Trident Protect, you can define applications in multiple ways:
 
 NOTE: You can also bring cluster wide resources in the Application definition.
 
-Two different examples with the Wordpress environment you have deployed: 
+Here are two examples with the Wordpress environment you have deployed: 
 
 * Application by namespace: everything in the namespace will be protected as one (PVC, POD, ConfigMaps, ...)
 * Application by label: you could protect the frontend & the backend differently, maybe with different schedules.
