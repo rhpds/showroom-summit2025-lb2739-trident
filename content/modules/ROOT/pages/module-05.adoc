@@ -9,9 +9,9 @@ Very philosophical questions, isn't it?
 
 With Trident Protect, you can define applications in multiple ways:
 
-* with *Labels* (ie subset of a namespace)
-* a whole namespace
-* multiple namespaces at Once
+* with *labels* (ie subset of a namespace)
+* a whole *namespace* (ie everything in it)
+* multiple namespaces at once
 
 NOTE: You can also bring cluster wide resources in the Application definition.
 
