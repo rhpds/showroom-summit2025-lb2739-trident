@@ -2,7 +2,7 @@
 
 Trident Protect can help you protect *applications*.
 
-Now, what *_is_* an application? How do you *_define_* it? +
+Now, what *_IS_* an application? How do you *_DEFINE_* it? +
 Very philosophical questions, isn't it?
 
 10 people may have 10 different answers. +
@@ -87,14 +87,14 @@ Let's create one snapshot of the Wordpress app:
 [.console-input]
 [source,bash]
 ----
-tridentctl protect create snapshot wpsnap1 --app wordpress --appvault lab-vault -n wordpress
+tridentctl-protect create snapshot wpsnap1 --app wordpress --appvault lab-vault -n wordpress
 ----
 Check that the snapshot is done:
 [.lines_space]
 [.console-input]
 [source,bash]
 ----
-tridentctl protect get snap -n wordpress
+tridentctl-protect get snap -n wordpress
 ----
 [.console-output]
 [source,bash]
@@ -136,14 +136,14 @@ Let's create one backup of the Wordpress app, based on the snapshot you just too
 [.console-input]
 [source,bash]
 ----
-tridentctl protect create backup wpbkp1 --app wordpress --snapshot wpsnap1 --appvault lab-vault -n wordpress
+tridentctl-protect create backup wpbkp1 --app wordpress --snapshot wpsnap1 --appvault lab-vault -n wordpress
 ----
 Check that the backup is done:
 [.lines_space]
 [.console-input]
 [source,bash]
 ----
-tridentctl protect get backup -n wordpress
+tridentctl-protect get backup -n wordpress
 ----
 [.console-output]
 [source,bash]
@@ -222,7 +222,7 @@ EOF
 [.console-input]
 [source,bash]
 ----
-tridentctl protect get schedule -n wordpress
+tridentctl-protect get schedule -n wordpress
 ----
 [.console-output]
 [source,bash]
@@ -287,8 +287,8 @@ From the console, run the 2 following commands to browse the AppVault:
 [.console-input]
 [source,bash]
 ----
-tridentctl protect get appvaultcontent lab-vault --app wordpress --show-resources all -n trident-protect
-tridentctl protect get appvaultcontent lab-vault --app wordpress --show-resources backup --show-paths -n trident-protect
+tridentctl-protect get appvaultcontent lab-vault --app wordpress --show-resources all -n trident-protect
+tridentctl-protect get appvaultcontent lab-vault --app wordpress --show-resources backup --show-paths -n trident-protect
 ----
 [.console-output]
 [source,bash]
@@ -317,9 +317,9 @@ Let's put the path of the backup in a variable and proceed with the restore
 [.console-input]
 [source,bash]
 ----
-BKPPATH=$(tridentctl protect get appvaultcontent lab-vault --app wordpress --show-resources backup --show-paths -n trident-protect | grep wpbkp1  | awk -F '|' '{print $8}')
+BKPPATH=$(tridentctl-protect get appvaultcontent lab-vault --app wordpress --show-resources backup --show-paths -n trident-protect | grep wpbkp1  | awk -F '|' '{print $8}')
 
-tridentctl protect create br wpbr1 --namespace-mapping wordpress:wordpressrestore --appvault lab-vault -n wordpressrestore \
+tridentctl-protect create br wpbr1 --namespace-mapping wordpress:wordpressrestore --appvault lab-vault -n wordpressrestore \
   --storageclass-mapping storage-class-nfs:storage-class-iscsi-fs \
   --path $BKPPATH
 ----
@@ -328,7 +328,7 @@ After a couple of minutes, the process should be done:
 [.console-input]
 [source,bash]
 ----
-tridentctl protect get br -n wordpressrestore
+tridentctl-protect get br -n wordpressrestore
 ----
 [.console-output]
 [source,bash]

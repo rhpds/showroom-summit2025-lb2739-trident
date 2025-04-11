@@ -26,3 +26,5 @@
 * xref:module-06.adoc[Disaster Recovery for the VM workload]
 
 * xref:module-07.adoc[Bonus]
+
+* xref:appendix.adoc[Appendix]

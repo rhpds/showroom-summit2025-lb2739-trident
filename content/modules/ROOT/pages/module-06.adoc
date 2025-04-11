@@ -78,7 +78,7 @@ Check that the snapshot is done:
 [.console-input]
 [source,bash]
 ----
-tridentctl protect get snap -n my-vm
+tridentctl-protect get snap -n my-vm
 ----
 [.console-output]
 [source,bash]
@@ -132,9 +132,16 @@ spec:
   sourceAppVaultRef: lab-vault
   sourceApplicationName: my-vm
   sourceApplicationUID: $SRCAPPID
-  storageClassName: storage-class-nfs
+  storageClassName: storage-class-iscsi
 EOF
 ----
+
+[IMPORTANT]
+====
+As you need to specifcy the target storage class when creating an _AMR_, make sure it fits the same protocol and services as the source one.
+You cannot mirror from iSCSI to NFS for instance (but you can backup from iSCSI and restore to NFS)
+====
+
 Let's check the status of this new object on the DR cluster:
 [.lines_space]
 [.console-input]
