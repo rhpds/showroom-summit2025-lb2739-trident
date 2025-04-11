@@ -27,7 +27,7 @@ oc get ns trident-protect
 Error from server (NotFound): namespaces "trident-protect" not found
 ----
 
-=== Trident Protect installation
+== Trident Protect installation
 
 [#installtridentprotect]
 You are now ready to proceed:
@@ -52,7 +52,7 @@ chmod +x tridentctl-protect
 sudo cp ./tridentctl-protect /usr/local/bin/
 ----
 
-=== Trident Protect verification
+== Trident Protect verification
 
 If everything well, you should find a new POD in the _trident-protect_ namespace:
 [.lines_space]
@@ -104,7 +104,7 @@ snapshotrestores.protect.trident.netapp.io             2025-03-17T14:23:58Z
 snapshots.protect.trident.netapp.io                    2025-03-17T14:23:58Z
 ----
 
-=== Trident Protect AppVault creation
+== Trident Protect AppVault creation
 
 [#configureappvault]
 Trident Protect uses a S3 compatible bucket to save the application metadata, as well as the data when a backup is performed. +
