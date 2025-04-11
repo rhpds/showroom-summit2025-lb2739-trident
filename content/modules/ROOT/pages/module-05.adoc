@@ -126,7 +126,7 @@ snapshot-29a85194-428f-4e16-855a-c5ab9f849e3a-pvc-d527a991-4ba3-405a-b533-c22b23
 == Create an application backup of your application
 
 A application backup is pretty similar to a snapshot. +
-The main difference being that data is also going to be copied to the object store (with `Kopia` or `Restic`). +
+The main difference being that data is also going to be copied to the object store. +
 A backup is always based on a snapshot. If you don't specify one, Trident Protect will automatically create one for you. +
 You can also optionally use hooks in this process (`pre-backup-hook` & `post-backup-hook`).
 
@@ -162,7 +162,7 @@ First, you can notice that Trident Protect created some sub-folders to copy the 
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute,subs="attributes"]
 ----
 BUCKETFOLDERS=$(oc -n wordpress get backup wpbkp1 -o=jsonpath='{.status.appArchivePath}' | awk -F '/' '{print $1}')
 aws s3 ls --no-verify-ssl --endpoint-url http://s3.us-east-2.amazonaws.com s3://{s3_bucket_name}/$BUCKETFOLDERS/
@@ -178,13 +178,11 @@ aws s3 ls --no-verify-ssl --endpoint-url http://s3.us-east-2.amazonaws.com s3://
 Then, you can also parse the content of the backup:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute,subs="attributes"]
 ----
 BKPPATH=$(oc -n wordpress get backup wpbkp1 -o=jsonpath='{.status.appArchivePath}')
 aws s3 ls --no-verify-ssl --endpoint-url http://s3.us-east-2.amazonaws.com s3://{s3_bucket_name}/$BKPPATH --recursive --summarize --human-readable----
 ----
-
-NOTE: You can also browse this bucket from the AWS Console by switching to the AWS S3 category.
 
 [#schedule]
 == Create an protection schedule for your application

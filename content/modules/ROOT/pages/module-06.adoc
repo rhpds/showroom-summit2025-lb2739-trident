@@ -71,7 +71,7 @@ tridentctl-protect get app -n my-vm
 [.console-input]
 [source,bash]
 ----
-tridentctl protect create snapshot vmsnap1 --app my-vm --appvault lab-vault -n my-vm
+tridentctl-protect create snapshot vmsnap1 --app my-vm --appvault lab-vault -n my-vm
 ----
 Check that the snapshot is done:
 [.lines_space]

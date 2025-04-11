@@ -9,8 +9,8 @@
 ** xref:module-02.adoc#vsclass[Configure Volume Snapshot Class]
 
 * xref:module-03.adoc[Provision workloads]
-** xref:module-03.adoc#deploywordpress[Install Wordpress with Helm]
 ** xref:module-03.adoc#deployvm[Create a VM]
+** xref:module-03.adoc#deploywordpress[Install Wordpress with Helm]
 
 * xref:module-04.adoc[Install and configure Trident Protect]
 ** xref:module-04.adoc#installtridentprotect[Install Trident Protect]

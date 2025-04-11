@@ -251,14 +251,14 @@ Verify the backend configuration.
 [.console-input]
 [source,bash]
 ----
-oc get tridentbackendconfigs backend-fsxn-nfs -n trident
+oc get tridentbackendconfigs dr-backend-fsxn-nfs -n trident
 ----
 [.lines_space]
 [.console-output]
 [source,bash]
 ----
-NAME               BACKEND NAME   BACKEND UUID                           PHASE   STATUS
-backend-fsxn-nfs   fsxn-nfs       1f490bf3-492c-4ef7-899e-9e7d8711c82f   Bound   Success
+NAME                  BACKEND NAME      BACKEND UUID                           PHASE   STATUS
+dr-backend-fsxn-nfs   dr-fsxn-nfs       1f490bf3-492c-4ef7-899e-9e7d8711c82f   Bound   Success
 ----
 
 === Create the Trident Backend for iSCSI
