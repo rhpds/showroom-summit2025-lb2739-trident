@@ -13,8 +13,8 @@ NOTE: Both Trident and Trident Protect are already installed on the primary clus
 . Module 2 (Admin persona): 
 .. Install and configure Trident in OpenShift (in secondary cluster)
 . Module 3 (User persona):
-.. Provision containers workloads
 .. Provision VMs in OpenShift Virtualization
+.. Provision containers workloads
 . Module 4 (Admin persona):
 .. Install and configure Trident Protect in OpenShift (in secondary cluster)
 . Module 5 (User persona): 
@@ -27,7 +27,7 @@ NOTE: Both Trident and Trident Protect are already installed on the primary clus
 .. Create a Virtual Machine from this new template 
 .. Configure storage replication for container workloads
 .. Perform the Failover and Failback for container workloads
-
+. Appendix
 
 [[lab-setup]]
 == Lab Setup

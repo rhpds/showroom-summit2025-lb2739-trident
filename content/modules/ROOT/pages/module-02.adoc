@@ -14,9 +14,10 @@ You will use that method in this lab.
 [#operatorinstall]
 == Install the NetApp Trident Operator
 
-* Connect to the RedHat OpenShift GUI on the secondary cluster:
-** URL: {rosa2_openshift_console_url}
-** user/passwod: {rosa2_openshift_admin_user} / {rosa2_openshift_admin_password}
+* Connect to the Red Hat OpenShift GUI on the secondary cluster:
+** *URL*: {rosa2_openshift_console_url}
+** *user*: {rosa2_openshift_admin_user}
+** *password*: {rosa2_openshift_admin_password}
 * Locate the *OperatorHub* sub-menu in the *Operators* category
 * Filter on *trident*
 
@@ -250,14 +251,14 @@ Verify the backend configuration.
 [.console-input]
 [source,bash]
 ----
-oc get tridentbackendconfigs backend-fsxn-nfs -n trident
+oc get tridentbackendconfigs dr-backend-fsxn-nfs -n trident
 ----
 [.lines_space]
 [.console-output]
 [source,bash]
 ----
-NAME               BACKEND NAME   BACKEND UUID                           PHASE   STATUS
-backend-fsxn-nfs   fsxn-nfs       1f490bf3-492c-4ef7-899e-9e7d8711c82f   Bound   Success
+NAME                  BACKEND NAME      BACKEND UUID                           PHASE   STATUS
+dr-backend-fsxn-nfs   dr-fsxn-nfs       1f490bf3-492c-4ef7-899e-9e7d8711c82f   Bound   Success
 ----
 
 === Create the Trident Backend for iSCSI

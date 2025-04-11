@@ -2,19 +2,19 @@
 
 == Virtual Machine customization
 
-The Virtual Machine should be up&running by now. +
-Check its status from the GUI:
+* Now that the Virtual Machine is running, you can start adding some content. Press the `Open Web console` link (you can see in the previous screenshot under the miniature CentOS window)
+* This opens a new window. First Press on the `Guest login credentials` link, and use the information you see to log into the system
 
-===> IMAGE
+image::Mod6_OCP_Console_CentOS_console.png[CentOS console]
 
-You can now connect to this VM and write some content in the _home_ folder. +
+* Create a file in the home directly
 
-NOTE
-====
-Make sure 
-====
-
-===> IMAGE
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+echo "this is my file" > myfile.txt
+----
 
 == DR Setup
 
@@ -71,14 +71,14 @@ tridentctl-protect get app -n my-vm
 [.console-input]
 [source,bash]
 ----
-tridentctl protect create snapshot vmsnap1 --app my-vm --appvault lab-vault -n my-vm
+tridentctl-protect create snapshot vmsnap1 --app my-vm --appvault lab-vault -n my-vm
 ----
 Check that the snapshot is done:
 [.lines_space]
 [.console-input]
 [source,bash]
 ----
-tridentctl protect get snap -n my-vm
+tridentctl-protect get snap -n my-vm
 ----
 [.console-output]
 [source,bash]
@@ -132,9 +132,16 @@ spec:
   sourceAppVaultRef: lab-vault
   sourceApplicationName: my-vm
   sourceApplicationUID: $SRCAPPID
-  storageClassName: storage-class-nfs
+  storageClassName: storage-class-iscsi
 EOF
 ----
+
+[IMPORTANT]
+====
+As you need to specifcy the target storage class when creating an _AMR_, make sure it fits the same protocol and services as the source one.
+You cannot mirror from iSCSI to NFS for instance (but you can backup from iSCSI and restore to NFS)
+====
+
 Let's check the status of this new object on the DR cluster:
 [.lines_space]
 [.console-input]
