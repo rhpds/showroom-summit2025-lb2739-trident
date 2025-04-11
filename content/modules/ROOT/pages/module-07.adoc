@@ -1,6 +1,6 @@
 # Module 7: Bonus
 
-= Create a Virtual Machine Template based on the VM created in Module3
+== Create a Virtual Machine Template based on the VM created in Module3
 
 You noticed in Module-3 that creating a Virtual Machine takes some time (around 10 minutes in this case)... +
 When using Trident, you can enable the `Cross Namespace Volume Clone` feature to rapidly create VM from a template. +
@@ -14,7 +14,7 @@ metadata:
   annotations:
     trident.netapp.io/cloneToNamespace: .*
 
-= Create a Virtual Machine from this new template 
+== Create a Virtual Machine from this new template 
 
 apiVersion: trident.netapp.io/v1
 kind: TridentVolumeReference
@@ -43,7 +43,7 @@ spec:
   storageClassName: storage-class-iscsi
 
 
-= Disaster Recovery for your Wordpress application
+== Disaster Recovery for your Wordpress application
 
 You can follow here the same methodology you applied in the _Module-06_ for the Virtual Machine.
 
