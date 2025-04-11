@@ -8,7 +8,9 @@ In this chapter, you will perform the following tasks:
 [#deployvm]
 == Deploy a simple VM with a Block RWX volume
 
-* For this chapter, most tasks are going to be done in the OpenShift GUI. 
+For this chapter, most tasks are going to be done in the OpenShift GUI. 
+
+=== Project creation
 
 * Log into the PROD OpenShift console
 ** *URL*: {rosa_openshift_console_url}
@@ -18,6 +20,8 @@ In this chapter, you will perform the following tasks:
 * Create a new project (`my-vm` in the example)
 
 image::Mod3_OCP_Console_Project_Create.png[projectCreation]
+
+=== VM creation
 
 * Navigate to the `VirtualMachines` sub-menu of the `Virtualization` menu (make sure you are on the right project), press `Create `Virtual Machine` and then choose `From template`
 
@@ -39,7 +43,7 @@ image::Mod3_OCP_Console_VM_Form.png[VM Form]
 * You can customize the VM Name if you like
 ====
 
-* Verify the objects related to that VM with the CLI
+=== Verify the objects related to that VM with the CLI
 
 [.lines_space]
 [.console-input]
@@ -115,6 +119,10 @@ This is thanks to NetApp FlexClone technology, which does not use any storage wh
 [#deploywordpress]
 == Deploy the Wordpress Helm chart
 
+This is going to be done using the cli.
+
+=== Authenticate to the cluster
+
 First, you would need to log into the PROD cluster:
 [.lines_space]
 [.console-input]
@@ -122,6 +130,8 @@ First, you would need to log into the PROD cluster:
 ----
 oc login -u {rosa_openshift_admin_user} -p {rosa_openshift_admin_password} {rosa_openshift_api_url}
 ----
+
+=== Wordpress installation
 
 Wordpress is widely known as a blogging and content management platform. +
 Let's deploy it on the production cluster with the help of a Helm chart.
@@ -140,6 +150,8 @@ helm install wordpress bitnami/wordpress --version 24.1.18 -n wordpress --create
 ----
 
 NOTE: It takes a tiny bit more than a minute for the installation to complete.
+
+=== Verify the installation
 
 Check the content of the `wordpress` namespace.
 [.lines_space]
@@ -169,6 +181,8 @@ Notice the wordpress service ? +
 Copy & paste the address provided by the Load Balancer in your browser in order to access WordPress:
 
 image::Mod3_Wordpress_HelloWorld.png[HelloWorld]
+
+=== Create your own blog
 
 Before protecting that application, you may want to create your own blog. +
 You first need to connect to the admin page (use the same URL as Wordpress followed by "/wp-admin"). +
