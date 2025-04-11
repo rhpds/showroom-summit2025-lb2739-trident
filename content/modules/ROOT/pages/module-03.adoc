@@ -77,10 +77,10 @@ centos-stream9-salmon-crayfish-6   CloneInProgress   46.95%                2m41s
 * It takes a few minutes for this clone to finish, at which point, the PVC because visible
 
 [NOTE]
-----
+====
 *Do not wait for the VM Creation to complete which is the last step of that chapter*
 *You can move to the next chapter of this module, which describes how to deploy WordPress*
-----
+====
 
 [.lines_space]
 [.console-input]
