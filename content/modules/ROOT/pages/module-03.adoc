@@ -31,7 +31,7 @@ image::Mod3_OCP_Console_VM_Create.png[VMCreation]
 * Set the following parameters:
 ** Disk source: `PVC (clone PVC)`
 ** PVC project: `openshift-virtualization-os-images`
-** PVC name: `centos-stream9-7ddf038605a5`
+** PVC name: `centos-stream9-<UUID>`
 * Press `Quick create VirtualMachine`
 
 image::Mod3_OCP_Console_VM_Form.png[VM Form]
@@ -40,10 +40,21 @@ image::Mod3_OCP_Console_VM_Form.png[VM Form]
 ====
 * There is no _default_ VM image available on a FSxN volume
 * Since the iSCSI storage class you created is the default choice for Virtual Machines, you have to clone a volume when creating a VM
+* The PVC name might vary, depending on the latest version available in the lab environment. Choose the one that starts with centos-stream9
 * You can customize the VM Name if you like
 ====
 
 === Verify the objects related to that VM with the CLI
+
+First, you would need to log into the PROD cluster on the CLI:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute,subs="attributes"]
+----
+oc login -u {rosa_openshift_admin_user} -p {rosa_openshift_admin_password} {rosa_openshift_api_url}
+----
+
+Then check the status of the VM and its disk/PVC volume.
 
 [.lines_space]
 [.console-input]
@@ -121,15 +132,6 @@ This is thanks to NetApp FlexClone technology, which does not use any storage wh
 
 This is going to be done using the cli.
 
-=== Authenticate to the cluster
-
-First, you would need to log into the PROD cluster:
-[.lines_space]
-[.console-input]
-[source,bash,role=execute,subs="attributes"]
-----
-oc login -u {rosa_openshift_admin_user} -p {rosa_openshift_admin_password} {rosa_openshift_api_url}
-----
 
 === Wordpress installation
 
@@ -177,6 +179,8 @@ persistentvolumeclaim/data-wordpress-mariadb-0   Bound    pvc-9b53fcd7-09a9-4ce8
 persistentvolumeclaim/wordpress                  Bound    pvc-774a516b-2205-462f-bf5d-d4014e37c72b   10Gi       RWO            storage-class-nfs   <unset>                 10m
 ----
 
+You might have to wait a few more seconds and then repeat the above command until both pods show a staus of "Ready 1/1". 
+
 Notice the wordpress service ? +
 Copy & paste the address provided by the Load Balancer in your browser in order to access WordPress:
 
@@ -200,6 +204,15 @@ image::Mod3_Wordpress_FirstPost.png[FirstPost]
 Tadaaaa! +
 Your first application is now ready.
 
-* If you have not done it yet, you can go back to the Virtual Machine chapter to check that the creation is succesful, so that you can add some content to this VM
+=== Check VM Status
+
+By now the VM should be fully deployed. Check the status again:
+
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+oc -n my-vm get vm,pvc
+----
 
 * You are now done with this module. Please proceed with the next one.
