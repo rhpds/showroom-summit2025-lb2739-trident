@@ -96,7 +96,7 @@ Let's check the status of this new object on the DR cluster:
 [.console-input]
 [source,bash]
 ----
-tridentctlprotect get amr -n wordpressdr
+tridentctl protect get amr -n wordpressdr
 ----
 [.console-output]
 [source,bash]
@@ -112,7 +112,7 @@ It will take a couple of minutes for the mirroring to be setup, or `Established`
 [.console-input]
 [source,bash]
 ----
-tridentctlprotect get amr -n wordpressdr
+tridentctl protect get amr -n wordpressdr
 ----
 [.console-output]
 [source,bash]
@@ -145,6 +145,9 @@ Fairly quickly, you should get to the following result:
 |  wpamr1  |  lab-vault   |    lab-vault    |   Promoted    |   Promoted  |  20s  |       |
 +----------+--------------+-----------------+---------------+-------------+-------+-------+
 ----
+
+Wait until the state shows "Promoted".
+
 
 Let's check the content of our namespace:
 [.lines_space]
