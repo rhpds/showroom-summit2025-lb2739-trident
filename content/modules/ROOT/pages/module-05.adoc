@@ -32,7 +32,15 @@ Enough reading for now, let's protect WordPress!
 [#creation]
 == Create a Trident Protect application for the Wordpress namespace
 
-Make sure you are logged into the production cluster. +
+Make sure you are logged into the production cluster: +
+
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+oc config use-context $(oc config get-contexts | grep -E default.*api-prod | cut -c 11- | awk '{print $1}')
+----
+
 Defining an application can be done with the _tridentctl-protect_ cli or via CR (more adapted for GitOps methodologies).
 
 [.lines_space]
@@ -182,7 +190,7 @@ Then, you can also parse the content of the backup:
 [source,bash,role=execute,subs="attributes"]
 ----
 BKPPATH=$(oc -n wordpress get backup wpbkp1 -o=jsonpath='{.status.appArchivePath}')
-aws s3 ls --no-verify-ssl --endpoint-url http://s3.us-east-2.amazonaws.com s3://{s3_bucket_name}/$BKPPATH --recursive --summarize --human-readable----
+aws s3 ls --no-verify-ssl --endpoint-url http://s3.us-east-2.amazonaws.com s3://{s3_bucket_name}/$BKPPATH --recursive --summarize --human-readable
 ----
 
 [#schedule]
