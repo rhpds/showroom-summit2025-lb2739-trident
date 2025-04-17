@@ -152,6 +152,9 @@ tridentctl-protect get appvault -n trident-protect
 +-----------+----------+-----------+-------+---------+-----+
 ----
 
+You might have to wait a few seconds and repeat the last command until the state is "Available". 
+
+
 [NOTE] 
 ====
 In a production environment, the administrator may also perform the following tasks:
