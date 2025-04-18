@@ -78,7 +78,7 @@ Check that the snapshot is done:
 [.console-input]
 [source,bash]
 ----
-tridentctl-protect get snap -n my-vm
+tridentctl protect get snap -n my-vm
 ----
 [.console-output]
 [source,bash]
@@ -147,7 +147,7 @@ Let's check the status of this new object on the DR cluster:
 [.console-input]
 [source,bash]
 ----
-tridentctlprotect get amr -n vmdr
+tridentctl protect get amr -n vmdr
 ----
 [.console-output]
 [source,bash]
@@ -163,7 +163,7 @@ It will take a couple of minutes for the mirroring to be setup, or `Established`
 [.console-input]
 [source,bash]
 ----
-tridentctlprotect get amr -n vmdr
+tridentctl protect get amr -n vmdr
 ----
 [.console-output]
 [source,bash]
@@ -207,9 +207,13 @@ oc get -n vmdr vm,pvc
 [.console-output]
 [source,bash]
 ----
-TODOOOO
+NAME                                                           AGE     STATUS    READY
+virtualmachine.kubevirt.io/centos-stream9-apricot-antlion-51   6h17m   Running   True
+
+NAME                                                      STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/centos-stream9-apricot-antlion-51   Bound    pvc-c1b42345-352f-41bc-8e0c-4fa22eb0f019   30Gi       RWX            storage-class-iscsi   <unset>                 6h22m
 ----
 
 == Check the result
 
-Connect to the OpenShift DR Console and navigate to the Virtual Machines menu.
+Connect to the OpenShift DR Console and navigate to the Virtual Machines menu. It might take a while for the Virtual Machine to fully boot. Log into the console and verify what our test file is there. Everything is failed over from the production cluster. 
