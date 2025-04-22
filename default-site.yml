@@ -1,6 +1,6 @@
 ---
 site:
-  title: Red Hat Summit 2025
+  title: Lab 2739 - Hands-on Disaster Recovery of OpenShift containers and VMs with Trident Protect
   start_page: modules::index.adoc
 
 content:
