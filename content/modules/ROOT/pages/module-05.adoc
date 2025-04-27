@@ -199,8 +199,10 @@ aws s3 ls --no-verify-ssl --endpoint-url http://s3.us-east-2.amazonaws.com s3://
 Manually creating snapshots and backups is one thing...  +
 Automating their creation is another one.
 
-You can also create protection schedules with Trident Protect. +
-The _trident-protect_ can also be used for this, however you are going to use a YAML manifest in the lab console. +
+The best would be to create protection schedules! +
+The _tridentctl-protect_ tool can be used for this, however you are going to use a YAML manifest in the lab command line. +
+
+NOTE: like the _application_, _snapshot_ and _backup_, the _schedule_ must be created in the application project (ie _wordpress_ namespace)
 
 Make sure you are logged into the production cluster.
 
@@ -280,7 +282,7 @@ While protection is done for the whole application, restoring an application off
 * You can restore your application *in-place* or in a *different namespace* (same cluster or a different cluster)
 * You can even tailor the restore with a *post-restore hook*
 
-Let's perform a full restore on the DR cluster! 
+Let's perform a full restore on the *DR* cluster! 
 
 First step, make sure you are connected on the DR context:
 [.lines_space]
@@ -329,7 +331,7 @@ Let's put the path of the backup in a variable and proceed with the restore
 BKPPATH=$(tridentctl-protect get appvaultcontent lab-vault --app wordpress --show-resources backup --show-paths -n trident-protect | grep wpbkp1  | awk -F '|' '{print $8}')
 
 tridentctl-protect create br wpbr1 --namespace-mapping wordpress:wordpressrestore --appvault lab-vault -n wordpressrestore \
-  --storageclass-mapping storage-class-nfs:storage-class-iscsi-fs \
+  --storageclass-mapping storage-class-nfs:storage-class-iscsi \
   --path $BKPPATH
 ----
 After a couple of minutes, the process should be done:
