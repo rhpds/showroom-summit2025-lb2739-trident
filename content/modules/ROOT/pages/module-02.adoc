@@ -46,7 +46,7 @@ image::Mod2_OCP_Console_OperatorHub_TORC_form.png[TridentDetails]
 * Switch to `YAML view`, paste the following and press on `Create`
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 apiVersion: trident.netapp.io/v1
 kind: TridentOrchestrator
@@ -99,7 +99,7 @@ oc login -u {rosa2_openshift_admin_user} -p {rosa2_openshift_admin_password} {ro
 === Check the Trident version
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get tver -n trident
 ----
@@ -114,7 +114,7 @@ trident   25.02.1
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get pods -n trident
 ----
@@ -136,7 +136,7 @@ Installing the _tridentctl_ binary on this environment could be useful, especial
 You are going to need the root password for the `sudo` command: {ssh_password}
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 wget https://github.com/NetApp/trident/releases/download/v25.02.1/trident-installer-25.02.1.tar.gz
 tar -xf trident-installer-25.02.1.tar.gz
@@ -145,7 +145,7 @@ sudo cp trident-installer/tridentctl /usr/local/bin/tridentctl
 Verify the installation by viewing the Trident version of the installed operator.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl -n trident version
 ----
@@ -190,7 +190,7 @@ EOF
 Verify the secret has been added to the ROSA cluster.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get secrets -n trident dr-backend-fsxn-secret
 ----
@@ -208,7 +208,7 @@ Let's assign it to a variable.
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 export SVMIP=$(aws fsx describe-storage-virtual-machines | jq -r '.StorageVirtualMachines[].Endpoints.Management.IpAddresses[]' | grep 10.10) && echo $SVMIP
 ----
@@ -217,7 +217,7 @@ Run the following commands to create the Trident backend in the ROSA cluster.
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 cat << EOF | oc apply -f -
 apiVersion: trident.netapp.io/v1
@@ -249,7 +249,7 @@ Verify the backend configuration.
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get tridentbackendconfigs dr-backend-fsxn-nfs -n trident
 ----
@@ -268,7 +268,7 @@ You can reuse the same one here, as the same SVM will be used for both protocols
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 cat << EOF | oc apply -f -
 apiVersion: trident.netapp.io/v1
@@ -291,7 +291,7 @@ EOF
 Verify the backend configuration.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get tridentbackendconfigs dr-backend-fsxn-iscsi -n trident
 ----
@@ -332,7 +332,7 @@ This will be done via the lab console.
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 cat << EOF | oc apply -f -
 apiVersion: storage.k8s.io/v1
@@ -350,7 +350,7 @@ EOF
 Verify the storage class creation.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get sc storage-class-nfs
 ----
@@ -371,7 +371,7 @@ You can easily create a new one by pressing on the `Create StorageClass` button 
 Once on this page, switch to edit mode by clicking on the `Edit YAML` link, and paste the following and press on Create
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -398,7 +398,7 @@ image::Mod2_OCP_Console_Storage_Classes_Create.png[storageclasses]
 Verify the storage class creation.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get sc storage-class-iscsi
 ----
@@ -421,7 +421,7 @@ As Trident Protect relies on Trident to protect applications based configured wi
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 cat << EOF | kubectl apply -f -
 apiVersion: snapshot.storage.k8s.io/v1
@@ -437,7 +437,7 @@ You can now verify you have 2 classes available:
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get vsclass
 ----

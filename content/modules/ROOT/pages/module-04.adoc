@@ -9,7 +9,7 @@ You can use following to switch to the DR environment:
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
 ----
@@ -17,7 +17,7 @@ oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -
 Also make sure Trident Protect is not present:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get ns trident-protect
 ----
@@ -33,7 +33,7 @@ Error from server (NotFound): namespaces "trident-protect" not found
 You are now ready to proceed:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 helm repo add netapp-trident-protect https://netapp.github.io/trident-protect-helm-chart/
 oc create ns trident-protect
@@ -45,7 +45,7 @@ The binary _tridenctl-protect_ is also helpful to interact with Trident Protect.
 You are going to need the root password for the `sudo` command: {ssh_password}
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 curl -L -o tridentctl-protect https://github.com/NetApp/tridentctl-protect/releases/download/25.02.0/tridentctl-protect-linux-amd64
 chmod +x tridentctl-protect
@@ -57,7 +57,7 @@ sudo cp ./tridentctl-protect /usr/local/bin/
 If everything well, you should find a new POD in the _trident-protect_ namespace:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get po -n trident-protect
 ----
@@ -70,7 +70,7 @@ trident-protect-controller-manager-7cdff78665-brjxk            2/2     Running  
 There are also a whole list of CRD installed with Trident Protect:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get crd | grep protect
 ----

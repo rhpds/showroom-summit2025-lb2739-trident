@@ -11,7 +11,7 @@ image::Mod6_OCP_Console_CentOS_console.png[CentOS console]
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 echo "this is my file" > myfile.txt
 ----
@@ -24,7 +24,7 @@ We are going to use the CLI to perform that operation. +
 Make sure you are connected on the PROD cluster:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc config use-context $(oc config get-contexts | grep -E default.*api-prod | cut -c 11- | awk '{print $1}')
 ----
@@ -44,14 +44,14 @@ Make sure you are logged into the production cluster. +
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect create app my-vm --namespaces my-vm -n my-vm
 ----
 Check that the application is present:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect get app -n my-vm
 ----
@@ -69,14 +69,14 @@ tridentctl-protect get app -n my-vm
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect create snapshot vmsnap1 --app my-vm --appvault lab-vault -n my-vm
 ----
 Check that the snapshot is done:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl protect get snap -n my-vm
 ----
@@ -96,7 +96,7 @@ Place that ID in a variable, and check the result.
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 SRCAPPID=$(tridentctl-protect get app my-vm -n my-vm -o json | jq -r .metadata.uid)
 echo $SRCAPPID
@@ -108,7 +108,7 @@ Switch context to the DR cluster. +
 Once there, you can create a new namespace which will host the mirror of the app.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
 
@@ -145,7 +145,7 @@ You cannot mirror from iSCSI to NFS for instance (but you can backup from iSCSI 
 Let's check the status of this new object on the DR cluster:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl protect get amr -n vmdr
 ----
@@ -161,7 +161,7 @@ tridentctl protect get amr -n vmdr
 It will take a couple of minutes for the mirroring to be setup, or `Established`.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl protect get amr -n vmdr
 ----
@@ -182,7 +182,7 @@ You just need to _patch_ the AMR on the DR cluster.
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc patch amr vmamr1 -n vmdr --type=merge -p '{"spec":{"desiredState":"Promoted"}}'
 ----
@@ -200,7 +200,7 @@ Fairly quickly, you should get to the following result:
 Let's check the content of our namespace:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get -n vmdr vm,pvc
 ----
