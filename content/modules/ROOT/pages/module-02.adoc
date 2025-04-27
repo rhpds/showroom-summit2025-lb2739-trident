@@ -134,8 +134,7 @@ trident-node-linux-qm8nz              2/2     Running   0          34s
 trident-node-linux-sc2tn              2/2     Running   0          34s
 ----
 
-Installing the _tridentctl_ binary on this environment could be useful, especially for troubleshooting. +
-You are going to need the root password for the `sudo` command: {ssh_password}
+Installing the _tridentctl_ binary on this environment could be useful, especially for troubleshooting.
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
