@@ -171,7 +171,7 @@ These backends are linked to a *secret* which contains the credentials of the st
 
 [NOTE]
 ====
-A *SVM* ("Storage Virtual Machine") is an ONTAP virtual construct which serves data to clients and hosts from one or more volumes, through one or more network logical interfaces (LIFs). 
+A *SVM* ("Storage Virtual Machine") is an ONTAP virtual which serves data to clients and hosts from one or more volumes, through one or more network logical interfaces (LIFs). 
 ====
 
 
