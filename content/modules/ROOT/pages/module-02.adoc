@@ -142,6 +142,7 @@ You are going to need the root password for the `sudo` command: {ssh_password}
 ----
 wget https://github.com/NetApp/trident/releases/download/v25.02.1/trident-installer-25.02.1.tar.gz
 tar -xf trident-installer-25.02.1.tar.gz
+mkdir /home/rosa/bin
 cp trident-installer/tridentctl /home/rosa/bin
 ----
 Verify the installation by viewing the Trident version of the installed operator.

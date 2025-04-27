@@ -49,7 +49,7 @@ You are going to need the root password for the `sudo` command: {ssh_password}
 ----
 curl -L -o tridentctl-protect https://github.com/NetApp/tridentctl-protect/releases/download/25.02.0/tridentctl-protect-linux-amd64
 chmod +x tridentctl-protect
-sudo cp ./tridentctl-protect /usr/local/bin/
+cp ./tridentctl-protect /home/rosa/bin/
 ----
 
 == Trident Protect verification
