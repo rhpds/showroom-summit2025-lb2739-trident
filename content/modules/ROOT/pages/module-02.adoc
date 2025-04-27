@@ -134,6 +134,8 @@ trident-node-linux-qm8nz              2/2     Running   0          34s
 trident-node-linux-sc2tn              2/2     Running   0          34s
 ----
 
+=== Install the tridentctl tool
+
 Installing the _tridentctl_ binary on this environment could be useful, especially for troubleshooting.
 [.lines_space]
 [.console-input]
