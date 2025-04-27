@@ -41,8 +41,7 @@ helm install trident-protect-crds netapp-trident-protect/trident-protect-crds --
 helm install trident-protect netapp-trident-protect/trident-protect --set clusterName=dr --version 100.2502.0 --namespace trident-protect
 ----
 
-The binary _tridenctl-protect_ is also helpful to interact with Trident Protect. +
-You are going to need the root password for the `sudo` command: {ssh_password}
+The binary _tridenctl-protect_ is also helpful to interact with Trident Protect.
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
