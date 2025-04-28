@@ -194,7 +194,7 @@ You could also retrieve this address by running the following command:
 [.console-input]
 [source,bash,role=execute]
 ----
-oc get -n wordpress svc wordpress -o=jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+oc get -n wordpress svc wordpress -o=jsonpath='{.status.loadBalancer.ingress[0].hostname}';echo
 ----
 ====
 
