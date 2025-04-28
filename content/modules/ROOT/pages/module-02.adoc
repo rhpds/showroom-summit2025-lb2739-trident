@@ -1,5 +1,7 @@
 # Module 2: Install and configure Trident on the DR OpenShift cluster
 
+NOTE: Trident is already installed and configured on the production cluster.
+
 This task is generally done by the OpenShift administrator.
 
 NetApp Trident can be installed in various ways:
@@ -14,7 +16,7 @@ You will use that method in this lab.
 [#operatorinstall]
 == Install the NetApp Trident Operator
 
-* Connect to the Red Hat OpenShift GUI on the secondary cluster:
+* Connect to the Red Hat OpenShift GUI on the *DR* cluster:
 ** *URL*: {rosa2_openshift_console_url}
 ** *user*: {rosa2_openshift_admin_user}
 ** *password*: {rosa2_openshift_admin_password}
@@ -39,14 +41,14 @@ image::Mod2_OCP_Console_OperatorHub_Trident_Installed.png[TridentInstalled]
 
 image::Mod2_OCP_Console_OperatorHub_Trident_Details.png[TridentDetails]
 
-* Creating an instance of the Trident orchestrator will open new form
+* Creating an instance of the Trident orchestrator will open a new form
 
 image::Mod2_OCP_Console_OperatorHub_TORC_form.png[TridentDetails]
 
 * Switch to `YAML view`, paste the following and press on `Create`
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 apiVersion: trident.netapp.io/v1
 kind: TridentOrchestrator
@@ -99,7 +101,7 @@ oc login -u {rosa2_openshift_admin_user} -p {rosa2_openshift_admin_password} {ro
 === Check the Trident version
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get tver -n trident
 ----
@@ -114,7 +116,7 @@ trident   25.02.1
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get pods -n trident
 ----
@@ -132,20 +134,22 @@ trident-node-linux-qm8nz              2/2     Running   0          34s
 trident-node-linux-sc2tn              2/2     Running   0          34s
 ----
 
-Installing the _tridentctl_ binary on this environment could be useful, especially for troubleshooting. +
-You are going to need the root password for the `sudo` command: {ssh_password}
+=== Install the tridentctl tool
+
+Installing the _tridentctl_ binary on this environment could be useful, especially for troubleshooting.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 wget https://github.com/NetApp/trident/releases/download/v25.02.1/trident-installer-25.02.1.tar.gz
 tar -xf trident-installer-25.02.1.tar.gz
-sudo cp trident-installer/tridentctl /usr/local/bin/tridentctl
+mkdir /home/rosa/bin
+cp trident-installer/tridentctl /home/rosa/bin
 ----
 Verify the installation by viewing the Trident version of the installed operator.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl -n trident version
 ----
@@ -166,6 +170,12 @@ A *backend* defines the relationship between Trident and a storage system. It te
 These backends are linked to a *secret* which contains the credentials of the storage system.
 
 === Create a secret to store the SVM username and password in the ROSA cluster
+
+[NOTE]
+====
+A *SVM* ("Storage Virtual Machine") is an ONTAP construct which serves data to clients and hosts from one or more volumes, through one or more network logical interfaces (LIFs). 
+====
+
 
 This can be done vie the OpenShift Console or the GUI. +
 Let's use the cli:
@@ -190,7 +200,7 @@ EOF
 Verify the secret has been added to the ROSA cluster.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get secrets -n trident dr-backend-fsxn-secret
 ----
@@ -208,7 +218,7 @@ Let's assign it to a variable.
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 export SVMIP=$(aws fsx describe-storage-virtual-machines | jq -r '.StorageVirtualMachines[].Endpoints.Management.IpAddresses[]' | grep 10.10) && echo $SVMIP
 ----
@@ -217,7 +227,7 @@ Run the following commands to create the Trident backend in the ROSA cluster.
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 cat << EOF | oc apply -f -
 apiVersion: trident.netapp.io/v1
@@ -249,7 +259,7 @@ Verify the backend configuration.
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get tridentbackendconfigs dr-backend-fsxn-nfs -n trident
 ----
@@ -268,7 +278,7 @@ You can reuse the same one here, as the same SVM will be used for both protocols
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 cat << EOF | oc apply -f -
 apiVersion: trident.netapp.io/v1
@@ -291,7 +301,7 @@ EOF
 Verify the backend configuration.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get tridentbackendconfigs dr-backend-fsxn-iscsi -n trident
 ----
@@ -317,12 +327,12 @@ This access mode is supported with all protocols proposed by Trident (File and B
 
 However, configuring a RWX workload with a block protocol such as iSCSI requires two things:
 
-* the storage class must not specifcy any filesystem
+* the storage class must not specify any filesystem
 * the PVC must explicitly mention `volumeMode: Block`
 
 You are going to create 2 storage classes:
 
-* `storage-class-nfs`: File workdloads, supports all ROSA access modes
+* `storage-class-nfs`: File workloads, supports all ROSA access modes
 * `storage-class-iscsi`: Block workloads, also supports all access modes
 
 === Create a NFS Storage Class
@@ -332,7 +342,7 @@ This will be done via the lab console.
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 cat << EOF | oc apply -f -
 apiVersion: storage.k8s.io/v1
@@ -350,7 +360,7 @@ EOF
 Verify the storage class creation.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get sc storage-class-nfs
 ----
@@ -371,7 +381,7 @@ You can easily create a new one by pressing on the `Create StorageClass` button 
 Once on this page, switch to edit mode by clicking on the `Edit YAML` link, and paste the following and press on Create
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -398,7 +408,7 @@ image::Mod2_OCP_Console_Storage_Classes_Create.png[storageclasses]
 Verify the storage class creation.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get sc storage-class-iscsi
 ----
@@ -421,7 +431,7 @@ As Trident Protect relies on Trident to protect applications based configured wi
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 cat << EOF | kubectl apply -f -
 apiVersion: snapshot.storage.k8s.io/v1
@@ -437,7 +447,7 @@ You can now verify you have 2 classes available:
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get vsclass
 ----

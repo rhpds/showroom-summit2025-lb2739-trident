@@ -36,7 +36,7 @@ Make sure you are logged into the production cluster: +
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc config use-context $(oc config get-contexts | grep -E default.*api-prod | cut -c 11- | awk '{print $1}')
 ----
@@ -45,7 +45,7 @@ Defining an application can be done with the _tridentctl-protect_ cli or via CR 
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect create app wordpress --namespaces wordpress -n wordpress
 ----
@@ -61,7 +61,7 @@ TIP: running this command with the `--dry-run` parameter will display the corres
 Check that the application is present:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect get app -n wordpress
 ----
@@ -94,14 +94,14 @@ You can find examples on this repo: https://github.com/NetApp/Verda
 Let's create one snapshot of the Wordpress app:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect create snapshot wpsnap1 --app wordpress --appvault lab-vault -n wordpress
 ----
 Check that the snapshot is done:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect get snap -n wordpress
 ----
@@ -119,7 +119,7 @@ As Wordpress has 2 PVC configured, you will find 2 associates CSI Volume Snapsho
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get -n wordpress vs
 ----
@@ -143,14 +143,14 @@ Let's create one backup of the Wordpress app, based on the snapshot you just too
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect create backup wpbkp1 --app wordpress --snapshot wpsnap1 --appvault lab-vault -n wordpress
 ----
 Check that the backup is done:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect get backup -n wordpress
 ----
@@ -199,14 +199,16 @@ aws s3 ls --no-verify-ssl --endpoint-url http://s3.us-east-2.amazonaws.com s3://
 Manually creating snapshots and backups is one thing...  +
 Automating their creation is another one.
 
-You can also create protection schedules with Trident Protect. +
-The _trident-protect_ can also be used for this, however you are going to use a YAML manifest in the lab console. +
+The best would be to create protection schedules! +
+The _tridentctl-protect_ tool can be used for this, however you are going to use a YAML manifest in the lab command line. +
+
+NOTE: like the _application_, _snapshot_ and _backup_, the _schedule_ must be created in the application project (ie _wordpress_ namespace)
 
 Make sure you are logged into the production cluster.
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 cat << EOF | oc apply -f -
 apiVersion: protect.trident.netapp.io/v1
@@ -229,7 +231,7 @@ EOF
 ----
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect get schedule -n wordpress
 ----
@@ -249,7 +251,7 @@ NOTE: no need to wait, you can always come back to this later, granted you will 
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect get snapshot -n wordpress
 tridentctl-protect get backup -n wordpress
@@ -280,12 +282,12 @@ While protection is done for the whole application, restoring an application off
 * You can restore your application *in-place* or in a *different namespace* (same cluster or a different cluster)
 * You can even tailor the restore with a *post-restore hook*
 
-Let's perform a full restore on the DR cluster! 
+Let's perform a full restore on the *DR* cluster! 
 
 First step, make sure you are connected on the DR context:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
 ----
@@ -294,7 +296,7 @@ You first need to find out the full path of your backup in the bucket. +
 From the console, run the 2 following commands to browse the AppVault:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect get appvaultcontent lab-vault --app wordpress --show-resources all -n trident-protect
 tridentctl-protect get appvaultcontent lab-vault --app wordpress --show-resources backup --show-paths -n trident-protect
@@ -324,18 +326,18 @@ Now that you have the full path of your backup, you can easily restore it on the
 Let's put the path of the backup in a variable and proceed with the restore
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 BKPPATH=$(tridentctl-protect get appvaultcontent lab-vault --app wordpress --show-resources backup --show-paths -n trident-protect | grep wpbkp1  | awk -F '|' '{print $8}')
 
 tridentctl-protect create br wpbr1 --namespace-mapping wordpress:wordpressrestore --appvault lab-vault -n wordpressrestore \
-  --storageclass-mapping storage-class-nfs:storage-class-iscsi-fs \
+  --storageclass-mapping storage-class-nfs:storage-class-iscsi \
   --path $BKPPATH
 ----
 After a couple of minutes, the process should be done:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect get br -n wordpressrestore
 ----
@@ -361,7 +363,7 @@ tridentctl-protect get br -n wordpressrestore
 First, check the content of the target namespace in the CLI:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get -n wordpressrestore svc,po,pvc
 ----
