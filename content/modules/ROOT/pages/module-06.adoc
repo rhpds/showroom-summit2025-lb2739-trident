@@ -121,7 +121,7 @@ Switch context to the DR cluster.
 oc config use-context DR
 ----
 
-You can now create a new namespace which will host the mirror of the app, initiated by an AMR (_AppMirrorRelationship_) created with Trident Protect.
+You can now create a new namespace which will host the mirror of the app, initiated by an AMR (_AppMirrorRelationship_) setup with Trident Protect.
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
