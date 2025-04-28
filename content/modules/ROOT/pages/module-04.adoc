@@ -5,13 +5,40 @@ This task is usually performed by the Kubernetes admin.
 
 At this point, you already logged in both ROSA clusters. +
 When using the `oc` tool, you can easily switch between clusters, by using the command `oc config use-context`. +
-You can use following to switch to the DR environment:
+
+However, as the context names are pretty long, it is a good practice to rename them with the `oc config rename-context` command to avoid typing errors.
 
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
 ----
-oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
+oc config rename-context $(oc config get-contexts | grep -E default.*api-prod | cut -c 11- | awk '{print $1}') PROD
+oc config rename-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}') DR
+----
+
+Let's quickly check this was succesfully applied:
+
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc config get-contexts
+----
+[.console-output]
+[source,bash]
+----
+CURRENT   NAME   CLUSTER                                         AUTHINFO                                                      NAMESPACE
+          DR     api-dr-p4p6h-t9k7-p1-openshiftapps-com:6443     cluster-admin/api-dr-p4p6h-t9k7-p1-openshiftapps-com:6443     default
+*         PROD   api-prod-p4p6h-jtx8-p1-openshiftapps-com:6443   cluster-admin/api-prod-p4p6h-jtx8-p1-openshiftapps-com:6443   default
+----
+
+You can now use following to switch to the DR environment:
+
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc config use-context DR
 ----
 
 Also make sure Trident Protect is not present:
@@ -48,7 +75,7 @@ The binary _tridenctl-protect_ is also helpful to interact with Trident Protect.
 ----
 curl -L -o tridentctl-protect https://github.com/NetApp/tridentctl-protect/releases/download/25.02.0/tridentctl-protect-linux-amd64
 chmod +x tridentctl-protect
-cp ./tridentctl-protect /home/rosa/bin/
+mv ./tridentctl-protect /home/rosa/bin/
 ----
 
 == Trident Protect verification
@@ -124,7 +151,7 @@ You first need to create two secrets:
 oc create secret generic -n trident-protect aws-s3-keys --from-literal=accessKeyID={aws_access_key_id} --from-literal=secretAccessKey={aws_secret_access_key}
 oc create secret generic -n trident-protect appvault-secret --from-literal=KOPIA_PASSWORD=mypassword
 ----
-CAUTION: Please *_do not_* change that password as the same bucket is used for both production and DR environments, and since the AppVault is already configured on the production environment
+CAUTION: Please *_do not_* change that appvault-secret password as the same bucket is used for both production and DR environments, and since the AppVault is already configured on the production environment
 
 [.console-output]
 [source,bash]
@@ -157,6 +184,7 @@ You might have to wait a few seconds and repeat the last command until the state
 [NOTE] 
 ====
 In a production environment, the administrator may also perform the following tasks:
+
 - Create the user namespace
 - Create a service account that allows the creation of a Trident Protect application in that namespace
 - Grant access to AppVault objects for individual users

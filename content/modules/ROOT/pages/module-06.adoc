@@ -1,13 +1,18 @@
 # Module 6: Disaster Recovery Plan for your VM
 
+For this module, make sure you are connected to the OpenShift PROD Console, then switch to the Virtualization Tab and make sure the `my-vm` project is selected. Finally enter the VM detail page.
+
 == Virtual Machine customization
 
-* Now that the Virtual Machine is running, you can start adding some content. Press the `Open Web console` link (you can see in the previous screenshot under the miniature CentOS window)
+* Now that the Virtual Machine is running, you can start adding some content. Press the `Open Web console` link
+
+image::Mod6_OCP_Console_VM_Running_OpenWebConsole.png[Open Web Console]
+
 * This opens a new window. First Press on the `Guest login credentials` link, and use the information you see to log into the system
 
 image::Mod6_OCP_Console_CentOS_console.png[CentOS console]
 
-* Create a file in the home directly
+* Create a file in the home directory
 
 [.lines_space]
 [.console-input]
@@ -15,6 +20,8 @@ image::Mod6_OCP_Console_CentOS_console.png[CentOS console]
 ----
 echo "this is my file" > myfile.txt
 ----
+
+You can now close that Web Console.
 
 == DR Setup
 
@@ -26,7 +33,7 @@ Make sure you are connected on the PROD cluster:
 [.console-input]
 [source,bash,role=execute]
 ----
-oc config use-context $(oc config get-contexts | grep -E default.*api-prod | cut -c 11- | awk '{print $1}')
+oc config use-context PROD
 ----
 
 Setting the Disaster Recovery Plan is done in a few steps:
@@ -78,7 +85,7 @@ Check that the snapshot is done:
 [.console-input]
 [source,bash,role=execute]
 ----
-tridentctl protect get snap -n my-vm
+tridentctl-protect get snap -n my-vm
 ----
 [.console-output]
 [source,bash]
@@ -92,6 +99,7 @@ tridentctl protect get snap -n my-vm
 
 === Retrieve the Trident Protect application ID
 
+This ID is required to configure the mirror relationship. +
 Place that ID in a variable, and check the result.
 
 [.lines_space]
@@ -104,14 +112,20 @@ echo $SRCAPPID
 
 === Setup the mirroring relationship
 
-Switch context to the DR cluster. +
-Once there, you can create a new namespace which will host the mirror of the app.
+The remaining part of this module will be done in the DR cluster. +
+Switch context to the DR cluster.
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
 ----
-oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
+oc config use-context DR
+----
 
+You can now create a new namespace which will host the mirror of the app, initiated by an AMR (_AppMirrorRelationship_) setup with Trident Protect.
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
 oc create ns vmdr
 
 cat << EOF | oc apply -f -
@@ -136,18 +150,25 @@ spec:
 EOF
 ----
 
+[NOTE]
+====
+When creating the AMR with the tridentctl-protect tool, you don't need to manually create the target namespace. +
+Trident will perform that task for you.
+====
+
 [IMPORTANT]
 ====
-As you need to specifcy the target storage class when creating an _AMR_, make sure it fits the same protocol and services as the source one.
+As you need to specify the target storage class when creating an _AMR_, make sure it fits the same protocol and services as the source one.
 You cannot mirror from iSCSI to NFS for instance (but you can backup from iSCSI and restore to NFS)
 ====
 
-Let's check the status of this new object on the DR cluster:
+Let's check the status of this new object on the DR cluster. +
+It should be in the `Establishing` state, which means that the configuration is on-going.
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
 ----
-tridentctl protect get amr -n vmdr
+tridentctl-protect get amr -n vmdr
 ----
 [.console-output]
 [source,bash]
@@ -163,7 +184,7 @@ It will take a couple of minutes for the mirroring to be setup, or `Established`
 [.console-input]
 [source,bash,role=execute]
 ----
-tridentctl protect get amr -n vmdr
+tridentctl-protect get amr -n vmdr
 ----
 [.console-output]
 [source,bash]
@@ -175,10 +196,34 @@ tridentctl protect get amr -n vmdr
 +----------+--------------+-----------------+---------------+-------------+-------+-------+
 ----
 
+Everything is now ready. Your VM is protected and the DR plan is setup!
+
+Last thing to check, when the mirror is configured, you will only see the PVC on the target namespace. +
+All remaining application objects will be deployed once you activate the DR.
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc get -n vmdr pvc
+----
+[.console-output]
+[source,bash]
+----
+NAME                              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
+centos-stream9-sapphire-mink-40   Bound    pvc-6f2e82b1-e901-4a97-bcb5-166125a9d7f3   30Gi       RWX            storage-class-iscsi   <unset>                 6m36s
+----
+
+[NOTE]
+====
+Even though the PVC is labelled RWX, it is currently `Read-Only`, as this volume is the mirror replication target. +
+It will become `Read-Write` once you fail over the VM.
+====
+
 == Failover your application
 
 Failover your application is pretty straight forward. +
-You just need to _patch_ the AMR on the DR cluster.
+You just need to _patch_ the AMR on the DR cluster. +
+This will break the mirror relationship, which in turn changes the volumes from `Read-Only` to `Read-Write`. From there, Trident Protect will redeploy all the protected objects on top of the PVC.
 
 [.lines_space]
 [.console-input]
@@ -186,7 +231,13 @@ You just need to _patch_ the AMR on the DR cluster.
 ----
 oc patch amr vmamr1 -n vmdr --type=merge -p '{"spec":{"desiredState":"Promoted"}}'
 ----
-Fairly quickly, you should get to the following result:
+Fairly quickly, you should get to the following status (`Promoting` followed by `Promoted`)
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+tridentctl-protect get amr -n vmdr
+----
 [.console-output]
 [source,bash]
 ----
@@ -214,6 +265,41 @@ NAME                                                      STATUS   VOLUME       
 persistentvolumeclaim/centos-stream9-apricot-antlion-51   Bound    pvc-c1b42345-352f-41bc-8e0c-4fa22eb0f019   30Gi       RWX            storage-class-iscsi   <unset>                 6h22m
 ----
 
+[NOTE]
+====
+If you needed to tailor the target VM, you could setup a PostFailover Hook with Trident Protect!
+====
+
 == Check the result
 
-Connect to the OpenShift DR Console and navigate to the Virtual Machines menu. It might take a while for the Virtual Machine to fully boot. Log into the console and verify what our test file is there. Everything is failed over from the production cluster. 
+Connect to the OpenShift DR Console and navigate to the Virtual Machines menu. It might take a while for the Virtual Machine to fully boot. +
+Log into the console and verify what our test file is there. Everything is failed over from the production cluster. 
+
+* Connect to the DR Console and navigate to the Virtual Machines menu:
+
+image::Mod6_OCP_DR_Console_VMs.png[VMs List]
+
+* Check that the VM is `running` and press on the `Open web console` link:
+
+image::Mod6_OCP_DR_Console_VM_Status.png[VM Status]
+
+* This opens a new window. First Press on the `Guest login credentials` link, and use the information you see to log into the system
+
+image::Mod6_OCP_DR_Console_CentOS_console.png[CentOS console]
+
+* You will then see the content you created earlier:
+
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+ls; more *
+----
+[.console-output]
+[source,bash]
+----
+myfile.txt
+this is my file
+----
+
+Pretty awesome, no?
