@@ -5,13 +5,40 @@ This task is usually performed by the Kubernetes admin.
 
 At this point, you already logged in both ROSA clusters. +
 When using the `oc` tool, you can easily switch between clusters, by using the command `oc config use-context`. +
-You can use following to switch to the DR environment:
+
+However, as the context names are pretty long, it is a good practice to rename them with the `oc config rename-context` command to avoid typing errors.
 
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
 ----
-oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
+oc config rename-context $(oc config get-contexts | grep -E default.*api-prod | cut -c 11- | awk '{print $1}') PROD
+oc config rename-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}') DR
+----
+
+Let's quickly check this was succesfully applied:
+
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc config get-contexts
+----
+[.console-output]
+[source,bash]
+----
+CURRENT   NAME   CLUSTER                                         AUTHINFO                                                      NAMESPACE
+          DR     api-dr-p4p6h-t9k7-p1-openshiftapps-com:6443     cluster-admin/api-dr-p4p6h-t9k7-p1-openshiftapps-com:6443     default
+*         PROD   api-prod-p4p6h-jtx8-p1-openshiftapps-com:6443   cluster-admin/api-prod-p4p6h-jtx8-p1-openshiftapps-com:6443   default
+----
+
+You can now use following to switch to the DR environment:
+
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc config use-context DR
 ----
 
 Also make sure Trident Protect is not present:

@@ -38,7 +38,7 @@ Make sure you are logged into the production cluster: +
 [.console-input]
 [source,bash,role=execute]
 ----
-oc config use-context $(oc config get-contexts | grep -E default.*api-prod | cut -c 11- | awk '{print $1}')
+oc config use-context PROD
 ----
 
 Defining an application can be done with the _tridentctl-protect_ cli or via CR (more adapted for GitOps methodologies).
@@ -287,7 +287,7 @@ First step, make sure you are connected on the DR context:
 [.console-input]
 [source,bash,role=execute]
 ----
-oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
+oc config use-context DR
 ----
 
 You first need to find out the full path of your backup in the bucket. +

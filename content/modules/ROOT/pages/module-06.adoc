@@ -26,7 +26,7 @@ Make sure you are connected on the PROD cluster:
 [.console-input]
 [source,bash,role=execute]
 ----
-oc config use-context $(oc config get-contexts | grep -E default.*api-prod | cut -c 11- | awk '{print $1}')
+oc config use-context PROD
 ----
 
 Setting the Disaster Recovery Plan is done in a few steps:
@@ -110,7 +110,7 @@ Once there, you can create a new namespace which will host the mirror of the app
 [.console-input]
 [source,bash,role=execute]
 ----
-oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
+oc config use-context DR
 
 oc create ns vmdr
 
