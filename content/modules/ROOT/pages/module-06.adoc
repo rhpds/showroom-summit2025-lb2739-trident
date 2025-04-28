@@ -1,5 +1,7 @@
 # Module 6: Disaster Recovery Plan for your VM
 
+For this module, make sure you are connected to the OpenShift PROD Console, then switch to the Virtualization Tab and make sure the `my-vm` project is selected. Finally enter the VM detail page.
+
 == Virtual Machine customization
 
 * Now that the Virtual Machine is running, you can start adding some content. Press the `Open Web console` link
@@ -150,7 +152,7 @@ Trident will perform that task for you.
 
 [IMPORTANT]
 ====
-As you need to specifcy the target storage class when creating an _AMR_, make sure it fits the same protocol and services as the source one.
+As you need to specify the target storage class when creating an _AMR_, make sure it fits the same protocol and services as the source one.
 You cannot mirror from iSCSI to NFS for instance (but you can backup from iSCSI and restore to NFS)
 ====
 
