@@ -157,6 +157,7 @@ You might have to wait a few seconds and repeat the last command until the state
 [NOTE] 
 ====
 In a production environment, the administrator may also perform the following tasks:
+
 - Create the user namespace
 - Create a service account that allows the creation of a Trident Protect application in that namespace
 - Grant access to AppVault objects for individual users
