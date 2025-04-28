@@ -204,8 +204,6 @@ The _tridentctl-protect_ tool can be used for this, however you are going to use
 
 NOTE: like the _application_, _snapshot_ and _backup_, the _schedule_ must be created in the application project (ie _wordpress_ namespace)
 
-Make sure you are logged into the production cluster.
-
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
@@ -323,7 +321,7 @@ tridentctl-protect get appvaultcontent lab-vault --app wordpress --show-resource
 
 Now that you have the full path of your backup, you can easily restore it on the DR cluster.
 
-Let's put the path of the backup in a variable and proceed with the restore
+Let's put the path of the manual backup in a variable and proceed with the restore
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
@@ -383,8 +381,20 @@ NAME                                             STATUS   VOLUME                
 persistentvolumeclaim/data-wordpress-mariadb-0   Bound    pvc-ab5c1211-41fe-4a09-99e0-794e91e36b16   8Gi        RWO            storage-class-nfs   <unset>                 95s
 persistentvolumeclaim/wordpress                  Bound    pvc-f7209500-dba6-4429-9d7b-47a54f991f8b   10Gi       RWO            storage-class-nfs   <unset>                 95s
 ----
-As expected, the Load Balancer provided a new address for the wordpress service. +
+As expected, the Load Balancer provided a new address (_EXTERNAL-IP_) for the wordpress service. +
 Copy and paste it in your browser and check the content of the blog.
+
+[NOTE]
+====
+You could also retrieve this address by running the following command:
+
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc get -n wordpressrestore svc wordpress -o=jsonpath='{.status.loadBalancer.ingress[0].hostname}';echo
+----
+====
 
 Tadaaaaa! Your great blog is back online! +
 You just managed to restore your whole application on a different cluster from the object store.
