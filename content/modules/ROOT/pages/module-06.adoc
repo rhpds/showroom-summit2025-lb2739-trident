@@ -112,14 +112,20 @@ echo $SRCAPPID
 
 === Setup the mirroring relationship
 
-Switch context to the DR cluster. +
-Once there, you can create a new namespace which will host the mirror of the app.
+The remaining part of this module will be done in the DR cluster. +
+Switch context to the DR cluster.
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
 ----
 oc config use-context DR
+----
 
+You can now create a new namespace which will host the mirror of the app, initiated by an AMR (_AppMirrorRelationship_) created with Trident Protect.
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
 oc create ns vmdr
 
 cat << EOF | oc apply -f -
