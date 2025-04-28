@@ -46,6 +46,7 @@ image::Mod2_OCP_Console_OperatorHub_Trident_Details.png[TridentDetails]
 image::Mod2_OCP_Console_OperatorHub_TORC_form.png[TridentDetails]
 
 * Switch to `YAML view`, paste the following and press on `Create`
+
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
@@ -378,7 +379,7 @@ This will be done with the OpenShift Console. +
 Once connected to the GUI, navigate to the `Storage` menu and `StorageClasses` sub-menu. +
 
 You can easily create a new one by pressing on the `Create StorageClass` button at the top right of the screen. +
-Once on this page, switch to edit mode by clicking on the `Edit YAML` link, and paste the following and press on Create
+Once on this page, switch to edit mode by clicking on the `Edit YAML` link, paste the following and press on Create
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
