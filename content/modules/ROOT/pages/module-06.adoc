@@ -10,7 +10,7 @@ image::Mod6_OCP_Console_VM_Running_OpenWebConsole.png[Open Web Console]
 
 image::Mod6_OCP_Console_CentOS_console.png[CentOS console]
 
-* Create a file in the home directly
+* Create a file in the home directory
 
 [.lines_space]
 [.console-input]
@@ -190,7 +190,7 @@ tridentctl-protect get amr -n vmdr
 
 Everything is now ready. Your VM is protected and the DR plan is setup!
 
-Last check, when the mirror is configured, you will only see the PVC on the target namespace. +
+Last thing to check, when the mirror is configured, you will only see the PVC on the target namespace. +
 All remaining application objects will be deployed once you activate the DR.
 [.lines_space]
 [.console-input]
@@ -214,7 +214,8 @@ It will become `Read-Write` once you fail over the VM.
 == Failover your application
 
 Failover your application is pretty straight forward. +
-You just need to _patch_ the AMR on the DR cluster.
+You just need to _patch_ the AMR on the DR cluster. +
+This will break the mirror relationship, which in turn changes the volumes from `Read-Only` to `Read-Write`. From there, Trident Protect will redeploy all the protected objects on top of the PVC.
 
 [.lines_space]
 [.console-input]
@@ -255,6 +256,11 @@ virtualmachine.kubevirt.io/centos-stream9-apricot-antlion-51   6h17m   Running  
 NAME                                                      STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
 persistentvolumeclaim/centos-stream9-apricot-antlion-51   Bound    pvc-c1b42345-352f-41bc-8e0c-4fa22eb0f019   30Gi       RWX            storage-class-iscsi   <unset>                 6h22m
 ----
+
+[NOTE]
+====
+If you needed to tailor the target VM, you could setup a PostFailover Hook with Trident Protect!
+====
 
 == Check the result
 
