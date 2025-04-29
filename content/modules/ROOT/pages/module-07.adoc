@@ -54,7 +54,7 @@ We will use the _oc config_ command line to switch between clusters context.
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc config use-context PROD
 SRCAPPID=$(tridentctl-protect get app wordpress -n wordpress -o json | jq -r .metadata.uid) && echo $SRCAPPID
@@ -65,7 +65,7 @@ With that information, you can create the mirror relationship on the DR cluster.
 Let's first switch context to point to the DR cluster:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc config use-context DR
 ----
@@ -73,7 +73,7 @@ oc config use-context DR
 As we use a YAML manifest, you also need to create the target namespace on the DR cluster.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc create ns wordpressdr
 
@@ -101,7 +101,7 @@ EOF
 Let's check the status of this new object on the DR cluster:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect get amr -n wordpressdr
 ----
@@ -117,7 +117,7 @@ tridentctl-protect get amr -n wordpressdr
 It will take a couple of minutes for the mirroring to be setup, or `Established` in the Trident language.
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl protect get amr -n wordpressdr
 ----
@@ -133,7 +133,7 @@ tridentctl protect get amr -n wordpressdr
 Let's verify what we currently have in the target namespace:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get -n wordpressdr svc,po,pvc
 ----
@@ -153,14 +153,14 @@ You just need to _patch_ the AMR on the DR cluster.
 
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc patch amr wpamr1 -n wordpressdr --type=merge -p '{"spec":{"desiredState":"Promoted"}}'
 ----
 Fairly quickly, you should get to the following result:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 tridentctl-protect get amr -n wordpressdr
 ----
@@ -177,7 +177,7 @@ tridentctl-protect get amr -n wordpressdr
 Once in the `Promoted` state, let's check the content of our namespace:
 [.lines_space]
 [.console-input]
-[source,bash]
+[source,bash,role=execute]
 ----
 oc get -n wordpressdr svc,po,pvc
 ----
