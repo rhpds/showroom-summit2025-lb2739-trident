@@ -26,6 +26,10 @@
 ** xref:module-05.adoc#restore[Restore your application]
 
 * xref:module-06.adoc[Disaster Recovery for the VM workload]
+** xref:module-06.adoc#creation[Configure a Trident Protect application]
+** xref:module-06.adoc#snapshot[Create an application snapshot]
+** xref:module-06.adoc#mirror[Setup the application mirroring]
+** xref:module-06.adoc#failover[Activate the DR]
 
 * xref:module-07.adoc[Bonus]
 

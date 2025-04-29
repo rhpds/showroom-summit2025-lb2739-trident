@@ -46,6 +46,7 @@ Setting the Disaster Recovery Plan is done in a few steps:
 
 NOTE: Creating the AMR can be done with GitOps methodologies to automatically protect your application
 
+[#creation]
 === Create a Trident Protect application for the *my-vm* namespace
 Make sure you are logged into the production cluster. +
 
@@ -72,6 +73,7 @@ tridentctl-protect get app -n my-vm
 +-----------+------------+-------+-----+
 ----
 
+[#snapshot]
 === Create a Trident Protect snapshot of the *my-vm* namespace
 
 [.lines_space]
@@ -96,7 +98,7 @@ tridentctl-protect get snap -n my-vm
 |  vmsnap1  |     my-vm    | Completed | 11s |       |
 +-----------+--------------+-----------+-----+-------+
 ----
-
+[#mirror]
 === Retrieve the Trident Protect application ID
 
 This ID is required to configure the mirror relationship. +
@@ -218,7 +220,7 @@ centos-stream9-sapphire-mink-40   Bound    pvc-6f2e82b1-e901-4a97-bcb5-166125a9d
 Even though the PVC is labelled RWX, it is currently `Read-Only`, as this volume is the mirror replication target. +
 It will become `Read-Write` once you fail over the VM.
 ====
-
+[#failover]
 == Failover your application
 
 Failover your application is pretty straight forward. +
