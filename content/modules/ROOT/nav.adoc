@@ -32,5 +32,6 @@
 ** xref:module-06.adoc#failover[Activate the DR]
 
 * xref:module-07.adoc[Bonus]
+** xref:module-07.adoc#wordpress[Disaster Recovery for Wordpress]
 
 * xref:appendix.adoc[Appendix]

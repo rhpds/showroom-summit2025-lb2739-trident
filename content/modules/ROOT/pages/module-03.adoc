@@ -13,7 +13,7 @@ For this chapter, most tasks are going to be done in the OpenShift GUI.
 === Project creation
 
 * Log into the PROD OpenShift console
-** *URL*: {rosa_openshift_console_url}
+** *URL*: {rosa_openshift_console_url}[window=_blank]
 ** *user*: {rosa_openshift_admin_user}
 ** *password*: {rosa_openshift_admin_password}
 

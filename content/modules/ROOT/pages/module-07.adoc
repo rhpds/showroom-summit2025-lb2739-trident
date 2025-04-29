@@ -42,7 +42,7 @@ spec:
       storage: 10Gi
   storageClassName: storage-class-iscsi
 
-
+[#wordpress]
 == Disaster Recovery for your Wordpress application
 
 You can follow here the same methodology you applied in the _Module-06_ for the Virtual Machine.

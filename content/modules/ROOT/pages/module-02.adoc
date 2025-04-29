@@ -17,7 +17,7 @@ You will use that method in this lab.
 == Install the NetApp Trident Operator
 
 * Connect to the Red Hat OpenShift GUI on the *DR* cluster:
-** *URL*: {rosa2_openshift_console_url}
+** *URL*: {rosa2_openshift_console_url}[window=_blank]
 ** *user*: {rosa2_openshift_admin_user}
 ** *password*: {rosa2_openshift_admin_password}
 * Locate the *OperatorHub* sub-menu in the *Operators* category
