@@ -197,6 +197,6 @@ Trident Protect will take care of copying the application metadata between both 
 ====
 
 As we are going to run the whole lab as an admin, those 3 tasks are not covered.
-For further details on access control, please refer to this https://docs.netapp.com/us-en/trident/trident-protect/manage-authorization-access-control.html[link]
+For further details on access control, please refer to this https://docs.netapp.com/us-en/trident/trident-protect/manage-authorization-access-control.html[link,window="_blank"]
 
 You are now done with this module. Please proceed with the next one.
