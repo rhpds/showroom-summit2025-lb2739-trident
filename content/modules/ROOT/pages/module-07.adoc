@@ -14,7 +14,7 @@ metadata:
   annotations:
     trident.netapp.io/cloneToNamespace: .*
 
-== Create a Virtual Machine from this new template 
+=== Create a Virtual Machine from this new template 
 
 apiVersion: trident.netapp.io/v1
 kind: TridentVolumeReference
@@ -47,27 +47,34 @@ spec:
 
 You can follow here the same methodology you applied in the _Module-06_ for the Virtual Machine.
 
-== Setup the mirroring
+=== Setup the mirroring
 
-You first need to retrieve the application ID on the source using the command line. +
+You first need to retrieve the application ID on the PROD cluster using the command line. +
 We will use the _oc config_ command line to switch between clusters context.
 
 [.lines_space]
 [.console-input]
 [source,bash]
 ----
-oc config use-context $(oc config get-contexts | grep -E default.*api-prod | cut -c 11- | awk '{print $1}')
-SRCAPPID=$(tridentctl-protect get app wordpress -n wordpress -o json | jq -r .metadata.uid)
+oc config use-context PROD
+SRCAPPID=$(tridentctl-protect get app wordpress -n wordpress -o json | jq -r .metadata.uid) && echo $SRCAPPID
 ----
 
 With that information, you can create the mirror relationship on the DR cluster. +
+
+Let's first switch context to point to the DR cluster:
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+oc config use-context DR
+----
+
 As we use a YAML manifest, you also need to create the target namespace on the DR cluster.
 [.lines_space]
 [.console-input]
 [source,bash]
 ----
-oc config use-context $(oc config get-contexts | grep -E default.*api-dr | cut -c 11- | awk '{print $1}')
-
 oc create ns wordpressdr
 
 cat << EOF | oc apply -f -
@@ -96,7 +103,7 @@ Let's check the status of this new object on the DR cluster:
 [.console-input]
 [source,bash]
 ----
-tridentctl protect get amr -n wordpressdr
+tridentctl-protect get amr -n wordpressdr
 ----
 [.console-output]
 [source,bash]
@@ -123,8 +130,23 @@ tridentctl protect get amr -n wordpressdr
 |  wpamr1  |  lab-vault   |    lab-vault    | Established   | Established |  1m30 |       |
 +----------+--------------+-----------------+---------------+-------------+-------+-------+
 ----
+Let's verify what we currently have in the target namespace:
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+oc get -n wordpressdr svc,po,pvc
+----
+[.console-output]
+[source,bash]
+----
+NAME                                             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS        VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/data-wordpress-mariadb-0   Bound    pvc-1fc62930-31da-4d2d-92ca-4449fe13211c   8Gi        RWO            storage-class-nfs   <unset>                 2m35s
+persistentvolumeclaim/wordpress                  Bound    pvc-29440095-169e-4524-94f7-e45e03e1e2d6   10Gi       RWO            storage-class-nfs   <unset>                 2m35s
+----
+As expected, you only see the PVC for now.
 
-== Failover your application
+=== Failover your application
 
 Failover your application is pretty straight forward. +
 You just need to _patch_ the AMR on the DR cluster.
@@ -136,6 +158,12 @@ You just need to _patch_ the AMR on the DR cluster.
 oc patch amr wpamr1 -n wordpressdr --type=merge -p '{"spec":{"desiredState":"Promoted"}}'
 ----
 Fairly quickly, you should get to the following result:
+[.lines_space]
+[.console-input]
+[source,bash]
+----
+tridentctl-protect get amr -n wordpressdr
+----
 [.console-output]
 [source,bash]
 ----
@@ -146,10 +174,7 @@ Fairly quickly, you should get to the following result:
 +----------+--------------+-----------------+---------------+-------------+-------+-------+
 ----
 
-Wait until the state shows "Promoted".
-
-
-Let's check the content of our namespace:
+Once in the `Promoted` state, let's check the content of our namespace:
 [.lines_space]
 [.console-input]
 [source,bash]
@@ -159,18 +184,18 @@ oc get -n wordpressdr svc,po,pvc
 [.console-output]
 [source,bash]
 ----
-NAME                                 TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)                      AGE
-service/wordpress                    LoadBalancer   172.30.57.162    aa7ccfdb52de24e73867ae11c11bedc0-1849430877.us-east-2.elb.amazonaws.com   80:30087/TCP,443:32446/TCP   10m
-service/wordpress-mariadb            ClusterIP      172.30.248.149   <none>                                                                    3306/TCP                     10m
-service/wordpress-mariadb-headless   ClusterIP      None             <none>                                                                    3306/TCP                     10m
+NAME                                 TYPE           CLUSTER-IP       EXTERNAL-IP                                                              PORT(S)                      AGE
+service/wordpress                    LoadBalancer   172.30.104.107   a6fe2051eeb554284a7b3d398c119b63-831257922.us-east-2.elb.amazonaws.com   80:30175/TCP,443:30394/TCP   70s
+service/wordpress-mariadb            ClusterIP      172.30.227.139   <none>                                                                   3306/TCP                     69s
+service/wordpress-mariadb-headless   ClusterIP      None             <none>                                                                   3306/TCP                     69s
 
 NAME                             READY   STATUS    RESTARTS   AGE
-pod/wordpress-74d5d98bcc-5hnhz   1/1     Running   0          10m
-pod/wordpress-mariadb-0          1/1     Running   0          10m
+pod/wordpress-64f8c88c45-hns76   1/1     Running   0          70s
+pod/wordpress-mariadb-0          1/1     Running   0          69s
 
 NAME                                             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS        VOLUMEATTRIBUTESCLASS   AGE
-persistentvolumeclaim/data-wordpress-mariadb-0   Bound    pvc-9b53fcd7-09a9-4ce8-9b8e-9b24c22cd3ee   8Gi        RWO            storage-class-nfs   <unset>                 10m
-persistentvolumeclaim/wordpress                  Bound    pvc-774a516b-2205-462f-bf5d-d4014e37c72b   10Gi       RWO            storage-class-nfs   <unset>                 10m
+persistentvolumeclaim/data-wordpress-mariadb-0   Bound    pvc-1fc62930-31da-4d2d-92ca-4449fe13211c   8Gi        RWO            storage-class-nfs   <unset>                 5m4s
+persistentvolumeclaim/wordpress                  Bound    pvc-29440095-169e-4524-94f7-e45e03e1e2d6   10Gi       RWO            storage-class-nfs   <unset>                 5m4s
 ----
 
 As you can see, everything is back! +
