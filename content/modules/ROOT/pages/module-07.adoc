@@ -20,7 +20,7 @@ You are going to perform the latter one. Also, make sure you are connected to th
 [source,bash,role=execute]
 ----
 oc config use-context PROD
-tridentctl protect create sr vmsr1 --namespace-mapping my-vm:my-vm-restore --snapshot my-vm/vmsnap1 -n my-vm-restore
+tridentctl-protect create sr vmsr1 --namespace-mapping my-vm:my-vm-restore --snapshot my-vm/vmsnap1 -n my-vm-restore
 ----
 NOTE: "sr" stands for `SnapshotRestore`
 
@@ -193,7 +193,7 @@ It will take a couple of minutes for the mirroring to be setup, or `Established`
 [.console-input]
 [source,bash,role=execute]
 ----
-tridentctl protect get amr -n wordpressdr
+tridentctl-protect get amr -n wordpressdr
 ----
 [.console-output]
 [source,bash]
