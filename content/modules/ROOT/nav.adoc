@@ -28,10 +28,12 @@
 * xref:module-06.adoc[Disaster Recovery for the VM workload]
 ** xref:module-06.adoc#creation[Configure a Trident Protect application]
 ** xref:module-06.adoc#snapshot[Create an application snapshot]
+** xref:module-06.adoc#schedule[Create an snapshot schedule]
 ** xref:module-06.adoc#mirror[Setup the application mirroring]
 ** xref:module-06.adoc#failover[Activate the DR]
 
 * xref:module-07.adoc[Bonus]
+** xref:module-07.adoc#vm[Restore a VM]
 ** xref:module-07.adoc#wordpress[Disaster Recovery for Wordpress]
 
 * xref:appendix.adoc[Appendix]

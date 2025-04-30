@@ -291,7 +291,7 @@ oc config use-context DR
 ----
 
 You first need to find out the full path of your backup in the bucket. +
-From the console, run the 2 following commands to browse the AppVault:
+From the command line, run the 2 following commands to browse the AppVault:
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]

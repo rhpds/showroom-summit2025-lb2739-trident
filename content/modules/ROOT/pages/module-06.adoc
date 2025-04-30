@@ -98,6 +98,61 @@ tridentctl-protect get snap -n my-vm
 |  vmsnap1  |     my-vm    | Completed | 11s |       |
 +-----------+--------------+-----------+-----+-------+
 ----
+
+[IMPORTANT]
+====
+Trident Protect automatically _freezes_ and _unfreezes_ KubeVirt filesystems during data protection operations. +
+If needed, this could be disabled
+====
+
+[#schedule]
+=== Create a Snapshot Schedule
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+cat << EOF | kubectl apply -f -
+apiVersion: protect.trident.netapp.io/v1
+kind: Schedule
+metadata:
+  name: snap-sched1
+  namespace: my-vm
+spec:
+  appVaultRef: lab-vault
+  applicationRef: my-vm
+  backupRetention: "0"
+  enabled: true
+  granularity: Custom
+  recurrenceRule: |-
+    DTSTART:20250430T000000Z
+    RRULE:FREQ=MINUTELY;INTERVAL=5
+  snapshotRetention: "3"
+EOF
+----
+[NOTE]
+====
+You could also use the command line to create traditional schedules (hourly, daily, weekly, monthly). +
+As we use a custom frequency of 5 minutes, it is easier to enter as a YAML manifest
+====
+
+Check that it has been taken into account
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+tridentctl-protect get schedule -n my-vm
+----
+[.console-output]
+[source,bash]
+----
++-------------+-------+--------------------------------+---------+-------+-------+-----+
+|    NAME     |  APP  |            SCHEDULE            | ENABLED | STATE | ERROR | AGE |
++-------------+-------+--------------------------------+---------+-------+-------+-----+
+| snap-sched1 | my-vm | DTSTART:20250430T000000Z       | true    |       |       | 2s  |
+|             |       | RRULE:FREQ=MINUTELY;INTERVAL=5 |         |       |       |     |
++-------------+-------+--------------------------------+---------+-------+-------+-----+
+----
+
 [#mirror]
 === Retrieve the Trident Protect application ID
 
