@@ -17,7 +17,7 @@ You will use that method in this lab.
 == Install the NetApp Trident Operator
 
 * Connect to the Red Hat OpenShift GUI on the *DR* cluster:
-** *URL*: {rosa2_openshift_console_url}
+** *URL*: {rosa2_openshift_console_url}[window=_blank]
 ** *user*: {rosa2_openshift_admin_user}
 ** *password*: {rosa2_openshift_admin_password}
 * Locate the *OperatorHub* sub-menu in the *Operators* category
@@ -49,7 +49,7 @@ image::Mod2_OCP_Console_OperatorHub_TORC_form.png[TridentDetails]
 
 [.lines_space]
 [.console-input]
-[source,bash,role=execute]
+[source,yaml,role=execute]
 ----
 apiVersion: trident.netapp.io/v1
 kind: TridentOrchestrator
@@ -382,7 +382,7 @@ You can easily create a new one by pressing on the `Create StorageClass` button 
 Once on this page, switch to edit mode by clicking on the `Edit YAML` link, paste the following and press on Create
 [.lines_space]
 [.console-input]
-[source,bash,role=execute]
+[source,yaml,role=execute]
 ----
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
