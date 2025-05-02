@@ -35,5 +35,3 @@
 * xref:module-07.adoc[Bonus]
 ** xref:module-07.adoc#vm[Restore a VM]
 ** xref:module-07.adoc#wordpress[Disaster Recovery for Wordpress]
-
-* xref:appendix.adoc[Appendix]

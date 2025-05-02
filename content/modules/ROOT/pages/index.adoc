@@ -26,7 +26,6 @@ NOTE: Both Trident and Trident Protect are already installed on the primary clus
 .. Restore a Virtual Machine
 .. Configure storage replication for container workloads
 .. Perform the Failover and Failback for container workloads
-. Appendix
 
 [[lab-setup]]
 == Lab Setup
