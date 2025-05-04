@@ -23,7 +23,7 @@ The data protection capabilities provided by Trident Protect are only available 
 
 Amazon FSx for NetApp ONTAP is a storage service that allows customers to launch and run fully managed ONTAP file systems in the cloud. ONTAP is NetApp’s file system technology that provides a widely adopted set of data access and data management capabilities. Amazon FSx for NetApp ONTAP provides the familiar features, performance, and APIs of on-premises NetApp file systems with the agility, scalability, and simplicity of a fully managed AWS service. 
 
-== Demo lab Environment
+== Lab Environment
 
 The lab environment consists on:
 
