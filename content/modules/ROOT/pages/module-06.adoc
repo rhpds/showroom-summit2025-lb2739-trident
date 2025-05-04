@@ -279,8 +279,7 @@ It will become `Read-Write` once you fail over the VM.
 [#failover]
 == Failover your application
 
-Failover your application is pretty straight forward. +
-You just need to _patch_ the AMR on the DR cluster. +
+Failover your application is pretty straight forward. You just need to _patch_ the AMR on the DR cluster. +
 This will break the mirror relationship, which in turn changes the volumes from `Read-Only` to `Read-Write`. From there, Trident Protect will redeploy all the protected objects on top of the PVC.
 
 [.lines_space]
@@ -410,50 +409,6 @@ tridentctl-protect get amr -n vmdr
 
 NOTE: You may see an temporary error message if you refresh to quickly. Do no take it into account, it will disappear soon.
 
-IMPORTANT: resyncrhonizing the mirror will stop and delete the VM. When an AMR is established, the only obejcts you can see in the DR are the PVC.
+IMPORTANT: Resyncrhonizing the mirror will stop and delete everything but the PVC on the DR site. When an AMR is established, the only obejcts you can see in the DR are the PVC.
 
 You are now done with this module. Please proceed with the next one.
-
-
-
-
-
-
-[.lines_space]
-[.console-input]
-[source,bash,role=execute]
-----
-oc patch amr vmamr1 -n vmdr --type=merge -p '{"spec":{"desiredState":"Promoted"}}'
-----
-
-tridentctl-protect get amr -n vmdr
-+--------+------------+------------------+-----------------+-----------------------+---------------+-----------+-------+--------+
-|  NAME  | SOURCE APP | SOURCE APP VAULT | DESTINATION APP | DESTINATION APP VAULT | DESIRED STATE |   STATE   | ERROR |  AGE   |
-+--------+------------+------------------+-----------------+-----------------------+---------------+-----------+-------+--------+
-| vmamr1 | my-vm      | lab-vault        | my-vm           | lab-vault             | Promoted      | Promoting |       | 32m20s |
-+--------+------------+------------------+-----------------+-----------------------+---------------+-----------+-------+--------+
-
-tridentctl-protect get amr -n vmdr
-+--------+------------+------------------+-----------------+-----------------------+---------------+----------+-------+--------+
-|  NAME  | SOURCE APP | SOURCE APP VAULT | DESTINATION APP | DESTINATION APP VAULT | DESIRED STATE |  STATE   | ERROR |  AGE   |
-+--------+------------+------------------+-----------------+-----------------------+---------------+----------+-------+--------+
-| vmamr1 | my-vm      | lab-vault        | my-vm           | lab-vault             | Promoted      | Promoted |       | 32m57s |
-+--------+------------+------------------+-----------------+-----------------------+---------------+----------+-------+--------+
-
-
-Let's check the content of our namespace:
-[.lines_space]
-[.console-input]
-[source,bash,role=execute]
-----
-oc get -n vmdr vm,pvc
-----
-
-NAME                                                                    AGE   STATUS    READY
-virtualmachine.kubevirt.io/centos-stream9-jade-falcon-30                64s   Running   True
-virtualmachine.kubevirt.io/centos-stream9-jade-falcon-30-clone-ajr8kx   64s   Running   True
-
-NAME                                                                          STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
-persistentvolumeclaim/centos-stream9-jade-falcon-30                           Bound    pvc-da41e1e2-fdf7-41d9-b2b7-28d21a51fd01   30Gi       RWX            storage-class-iscsi   <unset>                 23m
-persistentvolumeclaim/restore-537b5970-c5b8-4928-8c13-3d701585a0f5-rootdisk   Bound    pvc-a928ea2c-a9b6-4c2e-9313-8b5c62b59508   30Gi       RWX            storage-class-iscsi   <unset>                 13m
-

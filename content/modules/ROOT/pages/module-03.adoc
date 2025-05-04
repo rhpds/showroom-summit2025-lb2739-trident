@@ -207,7 +207,8 @@ NAME                                          STATUS   VOLUME                   
 persistentvolumeclaim/centos-stream9-boston   Bound    pvc-3d6b8ffd-0483-44b5-9b0c-b0a51b528c40   30Gi       RWX            storage-class-iscsi   <unset>                 38s
 ----
 As you can see, the creation was super fast. +
-If the Template Image disk was on a different storage class, the process would have taken much longer (about 10 minutes), as it would first need to clone the data in a different volume.
+
+[NOTE]: If the Template Image disk was on a different storage class, the process would have taken much longer (about 10 minutes), as it would first need to clone the data in a different volume.
 
 * You can also see the status of the VM in the Console:
 

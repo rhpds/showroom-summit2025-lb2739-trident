@@ -138,8 +138,8 @@ First, make sure you are connected to the PROD cluster console, and then you can
 To clone the VM, following those steps:
 
 * in the VM window, click on the `Actions` menu (top/right of the screen)
-* select `clone
-* optionally change the name`
+* select `clone`
+* optionally change the name
 * select `Start VirtualMachine once created`
 ====
 

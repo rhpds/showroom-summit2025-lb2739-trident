@@ -554,7 +554,7 @@ You will also first need to log into that PROD cluster.
 [source,bash,role=execute]
 ----
 oc login -u {rosa_openshift_admin_user} -p {rosa_openshift_admin_password} {rosa_openshift_api_url}
-oc get dv -n openshift-virtualization-os-images --selector=cdi.kubevirt.io/dataImportCron
+oc delete dv,volumesnapshot -n openshift-virtualization-os-images --selector=cdi.kubevirt.io/dataImportCron
 ----
 
 In the next chapter, you will see the benefit of the configuration you just ran.
