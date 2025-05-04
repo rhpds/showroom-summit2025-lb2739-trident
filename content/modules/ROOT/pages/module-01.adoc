@@ -16,8 +16,27 @@ Trident features also address data protection, disaster recovery, portability, a
 
 == NetApp Trident Protect
 
-NetApp Trident protect provides advanced application data management capabilities that enhance the functionality and availability of stateful Kubernetes applications backed by the NetApp Trident CSI storage provisioner. Trident protect simplifies the management, protection, and movement of containerized workloads across public clouds and on-premises environments. It also offers automation capabilities through its API and CLI
+NetApp Trident protect provides advanced application data management capabilities that enhance the functionality and availability of stateful Kubernetes applications backed by the NetApp Trident CSI storage provisioner. Trident protect simplifies the management, protection, and movement of containerized workloads across public clouds and on-premises environments. It also offers automation capabilities through its API and CLI.
+The data protection capabilities provided by Trident Protect are only available if NetApp storage based on ONTAP, NetApp storage OS, is used. But Trident Protect can also be used for data migration use cases from non-ONTAP storage to ONTAP storage.
 
 == AWS FSx for NetApp ONTAP
 
 Amazon FSx for NetApp ONTAP is a storage service that allows customers to launch and run fully managed ONTAP file systems in the cloud. ONTAP is NetApp’s file system technology that provides a widely adopted set of data access and data management capabilities. Amazon FSx for NetApp ONTAP provides the familiar features, performance, and APIs of on-premises NetApp file systems with the agility, scalability, and simplicity of a fully managed AWS service. 
+
+== Demo lab Environment
+
+The lab environment consists on:
+* Two ROSA (Red Hat OpenShift Service on AWS) clusters version 4.16: "prod" and "dr". 
+* Each ROSA cluster has its own VPC. Both VPCs are in a single AWS account. The prod ROSA cluster has CIDR 10.0.0.0/16, and dr ROSA cluster has CIDR 10.10.0.0/16. 
+* In each VPC there is a FSx for NetApp ONTAP filesystem. Security Groups are configured to allow connection between ROSA cluster and FSx filesytem. Inside each FSx filesystem there is a Storage Virtual Machine (SVM) created to be dedicated to OpenShift. 
+* A VPC peering is configured between both VPCs to allow replication between the two FSx filesystems. The route tables and Security groups are updated to allow the replication between filesystems in both directions.
+* The replication technology used by Trident Protect to replicate PVs is NetApp SnapMirror, that efficiently replicates delta snapshots asynchronously between the SVMs of the two FSx filesytems. The FSx filesystems and their respective SVMs are already "peered" to allow replication between them.
+* In the ROSA cluster prod, Trident and Trident protect are already installed and configured.
+* In Module 2, you will install and configure Trident in ROSA cluster dr.
+* In Module 4, you will install and configure Trident Protect in ROSA cluster dr.
+* An AWS S3 bucket, that is used by Trident Protect as destination of data and metadata backups, is already created in the AWS account 
+* In addition to provision and protecting container workloads, in Module 3 and Module 6, you will privision a CentOS 9 VM in my-vm namespace in prod ROSA cluster, and you'll replicate it to vmdr namespace in dr ROSA cluster, as reflected in the following diagram
+
+== Diagram of the Demo Environment
+
+image::Mod1_lab_diagram.png[LabDiagram]
