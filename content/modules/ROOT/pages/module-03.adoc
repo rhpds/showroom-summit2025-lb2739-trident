@@ -133,18 +133,6 @@ image::Mod3_Wordpress_FirstPost.png[FirstPost]
 Tadaaaa! +
 Your first application is now ready.
 
-=== Check VM Status
-
-By now the VM should be fully deployed. Check the status again:
-
-[.lines_space]
-[.console-input]
-[source,bash,role=execute]
-----
-oc -n my-vm get vm,pvc
-----
-
-
 [#deployvm]
 == Deploy a simple VM with a Block RWX volume
 
