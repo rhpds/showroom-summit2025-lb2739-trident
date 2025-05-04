@@ -460,4 +460,103 @@ csi-aws-vsc       ebs.csi.aws.com         Delete           2d5h
 csi-trident-vsc   csi.trident.netapp.io   Delete           62s
 ----
 
+[#optimization]
+== Virtual Machine Images optimization
+
+The lab was initially setup with `AWS EBS` as a default storage class (type `GP3`). +
+OpenShift automatically created Virtual Machines images on a KubeVirt api called `datavolume` on top of that storage class.
+
+[NOTE]
+====
+A DataVolume is a custom resource provided by the Containerized Data Importer (CDI) project. +
+KubeVirt integrates with CDI in order to provide users a workflow for dynamically creating PVCs and importing data into those PVCs.
+====
+
+You can see them with the following command:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc get dv,volumesnapshot,pvc -n openshift-virtualization-os-images --selector=cdi.kubevirt.io/dataImportCron
+----
+[.console-output]
+[source,bash]
+----
+NAME                                                     PHASE       PROGRESS   RESTARTS   AGE
+datavolume.cdi.kubevirt.io/centos-stream9-1920d484672d   Succeeded   100.0%                10h
+datavolume.cdi.kubevirt.io/fedora-4fcda30051d5           Succeeded   100.0%                10h
+datavolume.cdi.kubevirt.io/rhel10-beta-da1c0cdc24da      Succeeded   100.0%                10h
+datavolume.cdi.kubevirt.io/rhel8-833d0f124287            Succeeded   100.0%                10h
+datavolume.cdi.kubevirt.io/rhel9-0c9204ba64c2            Succeeded   100.0%                10h
+
+NAME                                                STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/centos-stream9-1920d484672d   Bound    pvc-97787e44-3e19-4bd0-be51-16a0bd2a6f79   30Gi       RWO            gp3            <unset>                 10h
+persistentvolumeclaim/fedora-4fcda30051d5           Bound    pvc-f403b3cd-6247-4839-8b58-ff23aac1a8da   30Gi       RWO            gp3            <unset>                 10h
+persistentvolumeclaim/rhel10-beta-da1c0cdc24da      Bound    pvc-042c4b71-b91c-4936-985e-9bd266938c98   30Gi       RWO            gp3            <unset>                 10h
+persistentvolumeclaim/rhel8-833d0f124287            Bound    pvc-96250ddf-3a1c-4814-851c-275035dd9548   30Gi       RWO            gp3            <unset>                 10h
+persistentvolumeclaim/rhel9-0c9204ba64c2            Bound    pvc-5d10c854-bf26-44eb-b261-356721e785ec   30Gi       RWO            gp3            <unset>                 10h
+----
+
+You defined earlier AWS FSx as the default storage class for Virtual Machines. +
+If you tried to create a VM from a template, you would not see one with the label `Source available`, simply because the data sits on AWS EBS +
+To reach you goal, you would need to clone the existing PVC, so that the VM disk ends up on the right storage class. +
+This process takes roughly 10 minutes. +
+
+In order for the VM creation process to be much faster (a few seconds), you first need rebuild the source images. +
+To do so, you can just delete the existing datavolumes. OpenShift will automatically recreate what you need with the desired storage class.
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc delete dv,volumesnapshot -n openshift-virtualization-os-images --selector=cdi.kubevirt.io/dataImportCron
+----
+You can immediately see new datavolumes appearing to import data, and ultimately setting volume snapshots.
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc get dv -n openshift-virtualization-os-images
+----
+[.console-output]
+[source,bash]
+----
+NAME                                                     PHASE             PROGRESS   RESTARTS   AGE
+datavolume.cdi.kubevirt.io/centos-stream9-1920d484672d   Pending           N/A                   5s
+datavolume.cdi.kubevirt.io/fedora-4fcda30051d5           ImportScheduled   N/A                   5s
+datavolume.cdi.kubevirt.io/rhel10-beta-da1c0cdc24da      Pending           N/A                   5s
+datavolume.cdi.kubevirt.io/rhel8-833d0f124287                              N/A                   5s
+datavolume.cdi.kubevirt.io/rhel9-0c9204ba64c2                              N/A                   5s
+----
+Give it a couple of minutes and run the same command again:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc get dv,pvc,volumesnapshot -n openshift-virtualization-os-images
+----
+[.console-output]
+[source,bash]
+----
+NAME                                                                 READYTOUSE   SOURCEPVC                     SOURCESNAPSHOTCONTENT   RESTORESIZE   SNAPSHOTCLASS     SNAPSHOTCONTENT                                    CREATIONTIME   AGE
+volumesnapshot.snapshot.storage.k8s.io/centos-stream9-1920d484672d   true         centos-stream9-1920d484672d                           30Gi          csi-trident-vsc   snapcontent-3e78ca37-c394-4323-a9e1-b9d955838e4e   16s            17s
+volumesnapshot.snapshot.storage.k8s.io/fedora-4fcda30051d5           true         fedora-4fcda30051d5                                   30Gi          csi-trident-vsc   snapcontent-2589ee80-d92b-4845-8242-61aec00f7fd1   43s            44s
+volumesnapshot.snapshot.storage.k8s.io/rhel10-beta-da1c0cdc24da      true         rhel10-beta-da1c0cdc24da                              30Gi          csi-trident-vsc   snapcontent-0a7b5dac-8406-4dba-91c1-a0d904a60050   14s            14s
+volumesnapshot.snapshot.storage.k8s.io/rhel8-833d0f124287            true         rhel8-833d0f124287                                    30Gi          csi-trident-vsc   snapcontent-429a77dc-a882-495d-b5f9-50183f8bcec1   4s             4s
+volumesnapshot.snapshot.storage.k8s.io/rhel9-0c9204ba64c2            true         rhel9-0c9204ba64c2                                    30Gi          csi-trident-vsc   snapcontent-48a33cbe-687e-4bcd-991b-9182ec0e12fa   23s            23s
+----
+
+NOTE: Notice those volume snapshots were created against the Trident class ?
+
+This optimization configuration also needs to be applied to the production environment. +
+You will also first need to log into that PROD cluster.
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc login -u {rosa_openshift_admin_user} -p {rosa_openshift_admin_password} {rosa_openshift_api_url}
+oc get dv -n openshift-virtualization-os-images --selector=cdi.kubevirt.io/dataImportCron
+----
+
+In the next chapter, you will see the benefit of the configuration you just ran.
+
 You are now done with this module. Please proceed with the next one.

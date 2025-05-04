@@ -1,6 +1,6 @@
 # Module 7: Bonus
 
-[#vm]
+[#vmrestore]
 == Restore a Virtual Machine 
 
 As a reminder, while protection is done for the whole application, restoring it with Trident Product can be done in many ways: 
@@ -115,6 +115,86 @@ this is my file
 ----
 
 And voilà ! You have quickly demonstrated how to restore a VM from a snapshot.
+
+[#vmadd]
+== Mirror a second VM
+
+In this chapter, you are going to perform 2 tasks:
+
+* add a new VM to existing `my-vm` project
+* failover the Trident Protect app
+
+The goal is to showcase that since the app is defined at the namespace level, any addition to that project will also be mirrored to the DR cluster.
+
+=== Add a second VM on the PROD cluster
+
+First, make sure you are connected to the PROD cluster console, and then you can:
+
+* either create a whole new Centos9 VM, following the same steps used in Module03
+* or clone the existing VM which also would take a couple of minutes to complete
+
+[NOTE]
+====
+To clone the VM, following those steps:
+
+* in the VM window, click on the `Actions` menu (top/right of the screen)
+* select `clone
+* optionally change the name`
+* select `Start VirtualMachine once created`
+====
+
+Trident Protect will automatically syncrhonize the new content of the project with the AMR configured previously.
+
+=== Failover the Trident Protect App
+
+Let's failover once again your app, and check the result.
+
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc config use-context DR
+oc patch amr vmamr1 -n vmdr --type=merge -p '{"spec":{"desiredState":"Promoted"}}'
+----
+Fairly quickly, you should get to the following status (`Promoting` followed by `Promoted`)
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+tridentctl-protect get amr -n vmdr
+----
+[.console-output]
+[source,bash]
+----
++----------+--------------+-----------------+---------------+-------------+-------+-------+
+|   NAME   |  SOURCE APP  | DESTINATION APP | DESIRED STATE |    STATE    |  AGE  | ERROR |
++----------+--------------+-----------------+---------------+-------------+-------+-------+
+|  vmamr1  |  lab-vault   |    lab-vault    |   Promoted    |   Promoted  |  20s  |       |
++----------+--------------+-----------------+---------------+-------------+-------+-------+
+----
+Now that the process is done, let's check the content of our namespace:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc get -n vmdr vm,pvc
+----
+[.console-output]
+[source,bash]
+----
+NAME                                                            AGE   STATUS    READY
+virtualmachine.kubevirt.io/centos-stream9-boston                35s   Running   True
+virtualmachine.kubevirt.io/centos-stream9-boston-clone-2oohsv   35s   Running   True
+
+NAME                                                                          STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/centos-stream9-boston                                   Bound    pvc-68178d10-557a-4633-a194-44d34f166cdf   30Gi       RWX            storage-class-iscsi   <unset>                 31m
+persistentvolumeclaim/restore-e1cae597-3e5d-414c-be68-8e9bdbe8faf6-rootdisk   Bound    pvc-e5544494-2b85-4504-9bce-531ede45a1fb   30Gi       RWX            storage-class-iscsi   <unset>                 9m48s
+----
+
+You can see your two Virtual Machines! +
+If you go back to the OpenShift console, you will also see both of them:
+
+image::Mod7_OCP_Console_DR_2VMs.png[two VMs]
 
 [#wordpress]
 == Disaster Recovery for your Wordpress application
