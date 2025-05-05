@@ -179,10 +179,13 @@ aws s3 ls --no-verify-ssl --endpoint-url http://s3.us-east-2.amazonaws.com s3://
 [.console-output]
 [source,bash]
 ----
-      PRE backups/
-      PRE kopia/
-      PRE snapshots/
+      PRE backups/    # <1>
+      PRE kopia/      # <2>
+      PRE snapshots/  # <3>
 ----
+<1> The _backups_ folder contains the app metadata related to Trident Protect backups
+<2> the _kopia_ folder contains the data when running Trident Protect backups (if you set _restic_ as a datamover, the folder name would be different)
+<3> The _snapshots_ folder contains the app metadata related to Trident Protect snapshots
 
 Then, you can also parse the content of the backup:
 [.lines_space]
