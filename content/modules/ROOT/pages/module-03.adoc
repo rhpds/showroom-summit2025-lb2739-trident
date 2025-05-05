@@ -157,7 +157,7 @@ image::Mod3_OCP_Console_VM_Create.png[VMCreation]
 
 * Select the `CentOS Stream 9 VM` template. This will open a new form.
 
-image::Mod3_OCP_Console_VM_Centos_template.png[VMTemplate]
+image::Mod3_OCP_Console_VM_Centos_template.png[VMTemplate, 150, 150]
 
 [NOTE] 
 ====
