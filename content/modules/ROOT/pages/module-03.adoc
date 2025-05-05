@@ -157,7 +157,7 @@ image::Mod3_OCP_Console_VM_Create.png[VMCreation]
 
 * Select the `CentOS Stream 9 VM` template. This will open a new form.
 
-image::Mod3_OCP_Console_VM_Centos_template.png[VMTemplate]
+image::Mod3_OCP_Console_VM_Centos_template.png[VMTemplate, 220, 220]
 
 [NOTE] 
 ====
@@ -196,7 +196,7 @@ persistentvolumeclaim/centos-stream9-boston   Bound    pvc-3d6b8ffd-0483-44b5-9b
 ----
 As you can see, the creation was super fast. +
 
-[NOTE]: If the Template Image disk was on a different storage class, the process would have taken much longer (about 10 minutes), as it would first need to clone the data in a different volume.
+NOTE: If the Template Image disk was on a different storage class, the process would have taken much longer (about 10 minutes), as it would first need to clone the data in a different volume.
 
 * You can also see the status of the VM in the Console:
 
