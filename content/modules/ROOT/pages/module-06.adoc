@@ -340,6 +340,8 @@ image::Mod6_OCP_DR_Console_VMs.png[VMs List]
 
 image::Mod6_OCP_DR_Console_VM_Status.png[VM Status]
 
+NOTE: Even though the VM status may be `Ready`, it still takes a couple of minutes for the boot and configuration to complete, at which point you can log in.
+
 * This opens a new window. First Press on the `Guest login credentials` link, and use the information you see to log into the system
 
 image::Mod6_OCP_DR_Console_CentOS_console.png[CentOS console]
