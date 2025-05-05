@@ -107,17 +107,17 @@ According to the OpenShift Container Platform documentation:
 * In the Kubernetes API, a _resource_ is an endpoint that stores a collection of API objects of a certain kind. For example, the built-in `Pods` resource contains a collection of `Pod` objects.
 * A _custom resource definition_ (CRD) object defines a new, unique object type, called a _kind_, in the cluster and lets the Kubernetes API server handle its entire lifecycle.
 
-For instance, Trident Protect created a new CRD called _applications.protect.trident.netapp.io_, which shortcut is _application_.
+For instance, Trident Protect created a new CRD called _applications.protect.trident.netapp.io_, which shortcut is _application_. +
 You are going use that new resource in the next module.
 ====
 
 [CAUTION]
 ====
-If multiple resources are called _applications_, it is wiser to use the complete name in order to retrieve the expected result.
+If multiple resources are called _applications_, it is wiser to use the complete name in order to retrieve the expected result. +
 Example with 2 different resources with the same shortcut
 
-* Trident Protect: applications.protect.trident.netapp.io
-* ArgoCD: applications.argoproj.io
+* *Trident Protect*: applications.protect.trident.netapp.io
+* *ArgoCD*: applications.argoproj.io
 ====
 
 == Trident Protect AppVault creation
