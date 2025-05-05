@@ -266,8 +266,8 @@ oc get -n vmdr pvc
 [.console-output]
 [source,bash]
 ----
-NAME                              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
-centos-stream9-sapphire-mink-40   Bound    pvc-6f2e82b1-e901-4a97-bcb5-166125a9d7f3   30Gi       RWX            storage-class-iscsi   <unset>                 6m36s
+NAME                                          STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/centos-stream9-boston   Bound    pvc-86c8b548-a9c5-4623-b672-7d4d1d5d01c1   30Gi       RWX            storage-class-iscsi   <unset>                 75s
 ----
 
 [NOTE]
@@ -275,11 +275,11 @@ centos-stream9-sapphire-mink-40   Bound    pvc-6f2e82b1-e901-4a97-bcb5-166125a9d
 Even though the PVC is labelled RWX, it is currently `Read-Only`, as this volume is the mirror replication target. +
 It will become `Read-Write` once you fail over the VM.
 ====
+
 [#failover]
 == Failover your application
 
-Failover your application is pretty straight forward. +
-You just need to _patch_ the AMR on the DR cluster. +
+Failover your application is pretty straight forward. You just need to _patch_ the AMR on the DR cluster. +
 This will break the mirror relationship, which in turn changes the volumes from `Read-Only` to `Read-Write`. From there, Trident Protect will redeploy all the protected objects on top of the PVC.
 
 [.lines_space]
@@ -315,11 +315,11 @@ oc get -n vmdr vm,pvc
 [.console-output]
 [source,bash]
 ----
-NAME                                                           AGE     STATUS    READY
-virtualmachine.kubevirt.io/centos-stream9-apricot-antlion-51   6h17m   Running   True
+NAME                                               AGE   STATUS    READY
+virtualmachine.kubevirt.io/centos-stream9-boston   9s    Running   True
 
-NAME                                                      STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
-persistentvolumeclaim/centos-stream9-apricot-antlion-51   Bound    pvc-c1b42345-352f-41bc-8e0c-4fa22eb0f019   30Gi       RWX            storage-class-iscsi   <unset>                 6h22m
+NAME                                          STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/centos-stream9-boston   Bound    pvc-86c8b548-a9c5-4623-b672-7d4d1d5d01c1   30Gi       RWX            storage-class-iscsi   <unset>                 2m44s
 ----
 
 [NOTE]
@@ -360,3 +360,55 @@ this is my file
 ----
 
 Pretty awesome, no?
+
+[#resync]
+== Resynchronize the mirror
+
+You have managed to create a VM, configure an asynchronous mirror relationship and test the DR failover. +
+Let's go back to an initial state and resyncrhonize the mirror relationship from PROD to DR +
+This can be easily achieved by just updating the state of the AMR once again:
+
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc patch amr vmamr1 -n vmdr --type=merge -p '{"spec":{"desiredState":"Established"}}'
+----
+You will see that the AMR is now in `Reestablishing` state:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+tridentctl-protect get amr -n vmdr
+----
+[.console-output]
+[source,bash]
+----
++--------+------------+------------------+-----------------+-----------------------+---------------+----------------+-------+-------+
+|  NAME  | SOURCE APP | SOURCE APP VAULT | DESTINATION APP | DESTINATION APP VAULT | DESIRED STATE |     STATE      | ERROR |  AGE  |
++--------+------------+------------------+-----------------+-----------------------+---------------+----------------+-------+-------+
+| vmamr1 | my-vm      | lab-vault        | my-vm           | lab-vault             | Established   | Reestablishing |       | 8m33s |
++--------+------------+------------------+-----------------+-----------------------+---------------+----------------+-------+-------+
+----
+After about 5 minutes, the mirroring should be back to its nominal state:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+tridentctl-protect get amr -n vmdr
+----
+[.console-output]
+[source,bash]
+----
++--------+------------+------------------+-----------------+-----------------------+---------------+-------------+-------+--------+
+|  NAME  | SOURCE APP | SOURCE APP VAULT | DESTINATION APP | DESTINATION APP VAULT | DESIRED STATE |    STATE    | ERROR |  AGE   |
++--------+------------+------------------+-----------------+-----------------------+---------------+-------------+-------+--------+
+| vmamr1 | my-vm      | lab-vault        | my-vm           | lab-vault             | Established   | Established |       | 13m29s |
++--------+------------+------------------+-----------------+-----------------------+---------------+-------------+-------+--------+
+----
+
+NOTE: You may see an temporary error message if you refresh to quickly. Do no take it into account, it will disappear soon.
+
+IMPORTANT: Resyncrhonizing the mirror will stop and delete everything but the PVC on the DR site. When an AMR is established, the only obejcts you can see in the DR are the PVC.
+
+You are now done with this module. Please proceed with the next one.

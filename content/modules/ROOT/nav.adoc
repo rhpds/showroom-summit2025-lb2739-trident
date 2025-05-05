@@ -9,10 +9,11 @@
 ** xref:module-02.adoc#tridentconfiguration[Configure Trident]
 ** xref:module-02.adoc#storageclasses[Configure Storage Classes]
 ** xref:module-02.adoc#vsclass[Configure Volume Snapshot Class]
+** xref:module-02.adoc#optimization[Virtual Machine image volume optimization]
 
 * xref:module-03.adoc[Provision workloads]
-** xref:module-03.adoc#deployvm[Create a VM]
 ** xref:module-03.adoc#deploywordpress[Install Wordpress with Helm]
+** xref:module-03.adoc#deployvm[Create a VM]
 
 * xref:module-04.adoc[Install and configure Trident Protect]
 ** xref:module-04.adoc#installtridentprotect[Install Trident Protect]
@@ -31,7 +32,9 @@
 ** xref:module-06.adoc#schedule[Create an snapshot schedule]
 ** xref:module-06.adoc#mirror[Setup the application mirroring]
 ** xref:module-06.adoc#failover[Activate the DR]
+** xref:module-06.adoc#resync[Resynchronize the DR]
 
 * xref:module-07.adoc[Bonus]
-** xref:module-07.adoc#vm[Restore a VM]
+** xref:module-07.adoc#vmrestore[Restore a VM]
+** xref:module-07.adoc#vmadd[Add a second VM to the project]
 ** xref:module-07.adoc#wordpress[Disaster Recovery for Wordpress]
