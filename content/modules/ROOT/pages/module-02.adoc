@@ -58,7 +58,7 @@ metadata:
   namespace: openshift-operators 
 spec:
   IPv6: false
-  debug: true
+  debug: false
   nodePrep:
   - iscsi
   imageRegistry: ''
