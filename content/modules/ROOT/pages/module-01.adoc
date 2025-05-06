@@ -5,6 +5,8 @@ With the growing demand to host VM on container platforms, the protection of the
 
 This lab focuses on storage (NetApp Trident) & data protection (NetApp Trident Protect) capabilities provided by NetApp for both containers & VM worklads.
 
+Trident and Trident Protect provide data management for NetApp storage solutions on premises and in the main hyperscalers: AWS, Azure and Google Cloud, for the first party storage solutions based on NetApp technology: FSx for NetApp ONTAP, Azure NetApp Files and Google Cloud NetApp Volumes, as for self-managed storage available in all hyperscalers: Cloud Volumes ONTAP (CVO).
+
 The underlying storage service is AWS FSx for NetApp ONTAP which provides fully managed shared storage with features like snapshots, cloning, and data tiering.
 
 
