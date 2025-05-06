@@ -47,7 +47,7 @@ oc config use-context PROD
 
 Time to deploy workloads!
 
-IMPORTANT: If you are only interested in protecting Virtual Machines, you can skip all the wordpress chapters.
+IMPORTANT: If you are only interested in protecting Virtual Machines, you can skip all the wordpress chapters and move directly to the <<deployvm,next chapter>>.
 
 [#deploywordpress]
 == Deploy the Wordpress Helm chart
