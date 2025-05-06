@@ -88,7 +88,7 @@ An application snapshot is composed of several steps:
 [NOTE]
 ====
 Hooks are not covered here in this lab. +
-You can find examples on this repo: https://github.com/NetApp/Verda[window=_blank]
+You can find examples on this repo: https://github.com/NetApp/Verda[window=_blank] icon:external-link[]
 ====
 
 Let's create one snapshot of the Wordpress app:
