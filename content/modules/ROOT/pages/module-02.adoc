@@ -498,6 +498,19 @@ persistentvolumeclaim/rhel9-0c9204ba64c2            Bound    pvc-5d10c854-bf26-4
 ----
 
 You defined earlier AWS FSx as the default storage class for Virtual Machines. +
+You can also verify this by running the following:
+[.lines_space]
+[.console-input]
+[source,bash,role=execute]
+----
+oc get storageclass -o=jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubevirt\.io/is-default-virt-class=="true")].metadata.name}';echo
+----
+[.console-output]
+[source,bash]
+----
+storage-class-iscsi
+----
+
 If you tried to create a VM from a template, you would not see one with the label `Source available`, simply because the data sits on AWS EBS +
 To reach you goal, you would need to clone the existing PVC, so that the VM disk ends up on the right storage class. +
 This process takes roughly 10 minutes. +
