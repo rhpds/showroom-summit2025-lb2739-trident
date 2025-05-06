@@ -498,7 +498,7 @@ persistentvolumeclaim/rhel9-0c9204ba64c2            Bound    pvc-5d10c854-bf26-4
 ----
 
 You defined earlier AWS FSx as the default storage class for Virtual Machines. +
-You can also verify this by running the following:
+You can also verify this by running the following. You should get `storage-class-iscsi` as a result.
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
