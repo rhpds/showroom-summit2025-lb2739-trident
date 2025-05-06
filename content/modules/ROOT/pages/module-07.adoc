@@ -354,3 +354,5 @@ persistentvolumeclaim/wordpress                  Bound    pvc-29440095-169e-4524
 
 As you can see, everything is back! +
 If you connect on your browser to the FQDN provided by the LoadBalancer, you should be able to connect to Wordpress and see the content create in the Module-03.
+
+If you have reached this point, congratulations, you have succesfully completed this lab !!
