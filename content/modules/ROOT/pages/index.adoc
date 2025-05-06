@@ -23,8 +23,8 @@ NOTE: Both Trident and Trident Protect are already installed on the primary clus
 .. Configure storage replication for VM workloads
 .. Perform a Failover for VM workloads
 . Module 7 (Bonus):
-.. Restore a Virtual Machine
-.. ADd a second Virtual Machine to the project and test the failover
+.. Restore a Virtual Machine from a snapshot
+.. Add a second Virtual Machine to the project and test the failover
 .. Configure storage replication for container workloads
 .. Perform the Failover and Failback for container workloads
 

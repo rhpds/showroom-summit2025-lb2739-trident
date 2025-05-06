@@ -1,7 +1,7 @@
 # Module 7: Bonus
 
 [#vmrestore]
-== Restore a Virtual Machine 
+== Restore a Virtual Machine from a snapshot
 
 As a reminder, while protection is done for the whole application, restoring it with Trident Product can be done in many ways: 
 
@@ -124,7 +124,7 @@ In this chapter, you are going to perform 2 tasks:
 * add a new VM to existing `my-vm` project
 * failover the Trident Protect app
 
-The goal is to showcase that since the app is defined at the namespace level, any addition to that project will also be mirrored to the DR cluster.
+The goal is to showcase that since the app is defined at the namespace level, any addition to that project will also be automatically mirrored to the DR cluster.
 
 === Add a second VM on the PROD cluster
 
@@ -145,7 +145,7 @@ To clone the VM, following those steps:
 
 Trident Protect will automatically syncrhonize the new content of the project with the AMR configured previously.
 
-=== Failover the Trident Protect App
+=== Failover the namespace with 2 VM
 
 Let's failover once again your app, and check the result.
 

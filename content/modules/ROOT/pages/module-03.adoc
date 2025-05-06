@@ -5,6 +5,8 @@ In this chapter, you will perform the following tasks:
 * Create a containerized workload with the _cli_
 * Create a Virtual Machine with the OpenShift Console
 
+== OpenShift context management
+
 At this point, you already logged in both ROSA clusters. +
 When using the `oc` tool, you can easily switch between clusters, by using the command `oc config use-context`. +
 
@@ -44,6 +46,8 @@ oc config use-context PROD
 ----
 
 Time to deploy workloads!
+
+IMPORTANT: If you are only interested in protecting Virtual Machines, you can skip all the wordpress chapters.
 
 [#deploywordpress]
 == Deploy the Wordpress Helm chart
@@ -141,7 +145,7 @@ For this chapter, most tasks are going to be done in the OpenShift GUI.
 === Project creation
 
 * Log into the PROD OpenShift console
-** *URL*: {rosa_openshift_console_url}[window=_blank]
+** *URL*: {rosa_openshift_console_url}[window=_blank] icon:external-link[]
 ** *user*: {rosa_openshift_admin_user}
 ** *password*: {rosa_openshift_admin_password}
 

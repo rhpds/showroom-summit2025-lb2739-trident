@@ -35,6 +35,6 @@
 ** xref:module-06.adoc#resync[Resynchronize the DR]
 
 * xref:module-07.adoc[Bonus]
-** xref:module-07.adoc#vmrestore[Restore a VM]
-** xref:module-07.adoc#vmadd[Add a second VM to the project]
+** xref:module-07.adoc#vmrestore[Restore a VM from a snapshot]
+** xref:module-07.adoc#vmadd[Mirror a second VM within the same namespace]
 ** xref:module-07.adoc#wordpress[Disaster Recovery for Wordpress]
