@@ -120,15 +120,17 @@ metadata:
 spec:
   appVaultRef: lab-vault
   applicationRef: my-vm
-  backupRetention: "0"
+  backupRetention: "0" # <1>
   enabled: true
   granularity: Custom
   recurrenceRule: |-
     DTSTART:20250430T000000Z
     RRULE:FREQ=MINUTELY;INTERVAL=5
-  snapshotRetention: "3"
+  snapshotRetention: "3" # <2>
 EOF
 ----
+<1> default value for backupRetention is 3
+<2> default value for snapshotRetention is 3
 [NOTE]
 ====
 You could also use the command line to create traditional schedules (hourly, daily, weekly, monthly). +
@@ -288,6 +290,14 @@ This will break the mirror relationship, which in turn changes the volumes from 
 ----
 oc patch amr vmamr1 -n vmdr --type=merge -p '{"spec":{"desiredState":"Promoted"}}'
 ----
+[NOTE]
+====
+In this lab, you are performing an application failover in the same way you would run a test exercise with your own infrastructure. +
+In other words, you are not destroying the source environment. +
+_Promoting_ the AMR *will not* delete the source app. The production environment is not impacted. +
+You are actually going to re-sync the application later in this module.
+====
+
 Fairly quickly, you should get to the following status (`Promoting` followed by `Promoted`)
 [.lines_space]
 [.console-input]
@@ -409,8 +419,12 @@ tridentctl-protect get amr -n vmdr
 +--------+------------+------------------+-----------------+-----------------------+---------------+-------------+-------+--------+
 ----
 
-NOTE: You may see an temporary error message if you refresh to quickly. Do no take it into account, it will disappear soon.
+NOTE: You may see a temporary warning message if you refresh to quickly. Do no take it into account, it will disappear soon.
 
-IMPORTANT: Resyncrhonizing the mirror will stop and delete everything but the PVC on the DR site. When an AMR is established, the only obejcts you can see in the DR are the PVC.
+[IMPORTANT]
+====
+Resynchronizing the mirror will stop and delete everything but the PVC on the DR site. When an AMR is established, the only object you can see in the DR is the PVC. +
+This PVC is back on `ReadOnly` mode as it is the target of the mirror relationship.
+====
 
 You are now done with this module. Please proceed with the next one.
