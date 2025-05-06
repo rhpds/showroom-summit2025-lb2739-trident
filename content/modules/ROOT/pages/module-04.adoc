@@ -63,6 +63,12 @@ oc get po -n trident-protect
 NAME                                                           READY   STATUS    RESTARTS   AGE
 trident-protect-controller-manager-7cdff78665-brjxk            2/2     Running   0          30s
 ----
+[NOTE]
+====
+Another pod (`autosupportbundle`) should eventually appear. +
+Its role is to generate support data, and potentially send container logs to NetApp Support.
+==== 
+
 There are also a whole list of CRD installed with Trident Protect:
 [.lines_space]
 [.console-input]
