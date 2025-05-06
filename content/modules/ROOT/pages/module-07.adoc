@@ -117,14 +117,14 @@ this is my file
 And voilà ! You have quickly demonstrated how to restore a VM from a snapshot.
 
 [#vmadd]
-== Mirror a second VM
+== Replicate a second VM
 
 In this chapter, you are going to perform 2 tasks:
 
 * add a new VM to existing `my-vm` project
 * failover the Trident Protect app
 
-The goal is to showcase that since the app is defined at the namespace level, any addition to that project will also be automatically mirrored to the DR cluster.
+The goal is to showcase that since the app is defined at the namespace level, any addition to that project will also be automatically replicated to the DR cluster.
 
 === Add a second VM on the PROD cluster
 

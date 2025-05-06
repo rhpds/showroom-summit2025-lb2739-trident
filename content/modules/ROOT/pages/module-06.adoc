@@ -23,7 +23,7 @@ echo "this is my file" > myfile.txt
 
 You can now close that Web Console.
 
-== DR Setup
+== Disaster Recovery Configuration
 
 Time to protect this very critical workloads!  +
 We are going to use the CLI to perform that operation. +
@@ -44,7 +44,11 @@ Setting the Disaster Recovery Plan is done in a few steps:
 * Retrieve the application ID
 * Setup the Trident Protect AMR (_Application Mirror Relationship_)
 
-NOTE: Creating the AMR can be done with GitOps methodologies to automatically protect your application
+[NOTE]
+====
+* AMR are based on the NetApp SnapMirror technology to replicate persistent volumes.
+* Creating the AMR can be done with GitOps methodologies to automatically protect your application 
+====
 
 [#creation]
 === Create a Trident Protect application for the *my-vm* namespace
@@ -293,7 +297,7 @@ oc patch amr vmamr1 -n vmdr --type=merge -p '{"spec":{"desiredState":"Promoted"}
 ----
 [NOTE]
 ====
-In this lab, you are performing an application failover in the same way you would run a test exercise with your own infrastructure. +
+In this lab, you are performing an application failover in the same way you would run a Disaster Recovery exercise with your own infrastructure. +
 In other words, you are not destroying the source environment. +
 _Promoting_ the AMR *will not* delete the source app. The production environment is not impacted. +
 You are actually going to re-sync the application later in this module.
