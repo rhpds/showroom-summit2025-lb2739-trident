@@ -512,7 +512,7 @@ storage-class-iscsi
 ----
 
 If you tried to create a VM from a template, you would not see one with the label `Source available`, simply because the data sits on AWS EBS +
-To reach you goal, you would need to clone the existing PVC, so that the VM disk ends up on the right storage class. +
+To reach your goal, you would need to clone the existing PVC, so that the VM disk ends up on the right storage class. +
 This process takes roughly 10 minutes. +
 
 In order for the VM creation process to be much faster (a few seconds), you first need rebuild the source images. +
