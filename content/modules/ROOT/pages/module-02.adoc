@@ -428,7 +428,7 @@ image::Mod2_OCP_Console_Storage_Classes.png[storageclasses]
 == Volume Snapshot Class
 
 By default, there is already a Volume Snapshot Class configured for AWS EBS volumes. +
-As Trident Protect relies on Trident to protect applications based configured with FSxN volumes, you also need to create a Volume Snapshot Class that is linked to a Trident driver:
+As Trident Protect relies on Trident to protect applications configured with FSxN volumes, you also need to create a Volume Snapshot Class that is linked to a Trident driver:
 
 [.lines_space]
 [.console-input]
@@ -515,7 +515,7 @@ If you tried to create a VM from a template, you would not see one with the labe
 To reach your goal, you would need to clone the existing PVC, so that the VM disk ends up on the right storage class. +
 This process takes roughly 10 minutes. +
 
-In order for the VM creation process to be much faster (a few seconds), you first need rebuild the source images. +
+In order for the VM creation process to be much faster (a few seconds), you first need to rebuild the source images. +
 To do so, you can just delete the existing datavolumes. OpenShift will automatically recreate what you need with the desired storage class.
 [.lines_space]
 [.console-input]
