@@ -25,15 +25,15 @@ You will use that method in this lab.
 
 image::Mod2_OCP_Console_OperatorHub_Trident.png[OperatorHub]
 
-* Press on the Trident box to enter the Installer window
+* Find the Trident box that has the `Certified` badge on the top right and click on it to enter the Installer window
 
 image::Mod2_OCP_Console_OperatorHub_Trident_Install.png[Installer]
 
-* Make sure you are on the most recent version (25.2.1 in the screenshot) and press on the `Install` button which will open the configuration page, leave all the parameters as they are and press `Install`
+* Make sure you are on the most recent version (25.2.1 in the screenshot) and press on the `Install` button which will open the configuration page. Leave all the parameters as they are and press `Install`
 
 image::Mod2_OCP_Console_OperatorHub_Trident_Install2.png[Configuration]
 
-* The installation is fairly quick. In less than 2 minutes, the Operator will be ready to use
+* The installation is fairly quick. Wait until the installation is complete. In less than 2 minutes, the Operator will be ready to use.  
 
 image::Mod2_OCP_Console_OperatorHub_Trident_Installed.png[TridentInstalled]
 
@@ -41,11 +41,11 @@ image::Mod2_OCP_Console_OperatorHub_Trident_Installed.png[TridentInstalled]
 
 image::Mod2_OCP_Console_OperatorHub_Trident_Details.png[TridentDetails]
 
-* Creating an instance of the Trident orchestrator will open a new form
+* Find the `Trident Orchestrator` box and click on the `Create instance` link within it. Creating an instance of the Trident orchestrator will open a new form
 
 image::Mod2_OCP_Console_OperatorHub_TORC_form.png[TridentDetails]
 
-* Switch to `YAML view`, paste the following and press on `Create`
+* Switch to `YAML view`, remove the pre-filled YAML manifest and paste the following and press on `Create`
 
 [.lines_space]
 [.console-input]
@@ -74,15 +74,17 @@ spec:
 * This is achieved by adding the `nodePrep` parameter
 ====
 
-* After a couple of minutes, the Trident Orchestrator will be fully installed
+* Observe the Status column. After a couple of minutes, the Trident Orchestrator will be fully installed
 
 image::Mod2_OCP_Console_OperatorHub_TORC_installed.png[TridentDetails]
 
 
 == Verification with the command line
 
+In this section we will go through the following steps:
+
 * Connect to the jumphost
-* Log in OpenShift
+* Log in to OpenShift CLI
 * Retrieve and verify the Trident version.
 
 === Authenticate `oc` to the cluster
@@ -135,9 +137,12 @@ trident-node-linux-qm8nz              2/2     Running   0          34s
 trident-node-linux-sc2tn              2/2     Running   0          34s
 ----
 
+NOTE: Trident consists of a controller component as well as a deamonset to ensure a Trident pod runs on each node and can control local mount/unmount activities for storage. 
+
+
 === Install the tridentctl tool
 
-Installing the _tridentctl_ binary on this environment could be useful, especially for troubleshooting.
+NetApp provides the _tridentctl_ tool for easy handling of Trident installation. Installing the _tridentctl_ binary can be useful, especially for troubleshooting.
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
@@ -168,17 +173,19 @@ tridentctl -n trident version
 == Configure Trident
 
 A *backend* defines the relationship between Trident and a storage system. It tells Trident how to communicate with that storage system and how Trident should provision volumes from it.
-These backends are linked to a *secret* which contains the credentials of the storage system.
+These backends are linked to a *secret* which contains the credentials of the storage system (or a software-defined tenant on that system). Trident can handle multiple storage backends at the same time. 
+
+NOTE: In this lab we will create backends for NFS (file) and iSCSI (block) protocols. Trident also supports various other storage protocols such as NVMe, Fibre Channel and SMB. 
 
 === Create a secret to store the SVM username and password in the ROSA cluster
 
 [NOTE]
 ====
-A *SVM* ("Storage Virtual Machine") is an ONTAP construct which serves data to clients and hosts from one or more volumes, through one or more network logical interfaces (LIFs). 
+A *SVM* ("Storage Virtual Machine") is an ONTAP construct which serves data to clients and hosts from one or more volumes, through one or more network logical interfaces (LIFs). It provides secure multi-tenancy on a shared storage platform. When you run multiple OpenShift clusters, you can use this to isolate them from each other at the storage level.
 ====
 
 
-This can be done vie the OpenShift Console or the GUI. +
+The credentials for the storage backend can be created via the OpenShift Console or the GUI. +
 Let's use the cli:
 
 [.lines_space]
@@ -214,7 +221,7 @@ backend-fsxn-secret         Opaque                                2      24h
 
 === Create the Trident Backend for NFS
 
-Before creating the backend, you need to retrieve the management IP of the Storage Virtual Machine setup in AWS FSxN. +
+Before creating the backend, you need to retrieve the management IP of the Storage Virtual Machine that is set up in AWS FSxN. We will use the aws CLI to retrieve it.+
 Let's assign it to a variable.
 
 [.lines_space]
@@ -272,6 +279,7 @@ NAME                  BACKEND NAME      BACKEND UUID                           P
 dr-backend-fsxn-nfs   dr-fsxn-nfs       1f490bf3-492c-4ef7-899e-9e7d8711c82f   Bound   Success
 ----
 
+
 === Create the Trident Backend for iSCSI
 
 The IP from the SVM has already been assigned to a variable in the previous paragraph. +
@@ -324,12 +332,12 @@ A storage class is necessary to instruct Trident how to provision volumes.
 ====
 ReadWriteMany (RWX) is required for *_Live Migration_* of your VMs. 
 This access mode is supported with all protocols proposed by Trident (File and Block).  
-====
 
 However, configuring a RWX workload with a block protocol such as iSCSI requires two things:
 
 * the storage class must not specify any filesystem
 * the PVC must explicitly mention `volumeMode: Block`
+====
 
 You are going to create 2 storage classes:
 
@@ -373,13 +381,14 @@ NAME                      PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGM
 storage-class-nfs         csi.trident.netapp.io   Delete          Immediate              true                   10s
 ----
 
+
 === Create an iSCSI Storage Class
 
 This will be done with the OpenShift Console. +
 Once connected to the GUI, navigate to the `Storage` menu and `StorageClasses` sub-menu. +
 
 You can easily create a new one by pressing on the `Create StorageClass` button at the top right of the screen. +
-Once on this page, switch to edit mode by clicking on the `Edit YAML` link, paste the following and press on Create
+Once on this page, switch to edit mode by clicking on the `Edit YAML` link. Remove the pre-filled YAML manifest and paste the following, then click `Create`
 [.lines_space]
 [.console-input]
 [source,yaml,role=execute]
@@ -401,12 +410,12 @@ allowVolumeExpansion: true
 
 [TIP]
 ====
-<1> Set this annotation to default the storage class to NetApp, as sometimes you don't explicitly have a choice to select a storage class.
+<1> Set this annotation to default the storage class for VMs to NetApp, as sometimes you don't explicitly have a choice to select a storage class.
 ====
 
 image::Mod2_OCP_Console_Storage_Classes_Create.png[storageclasses]
 
-Verify the storage class creation.
+Switch back to CLI and verify the storage class creation.
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
@@ -428,7 +437,7 @@ image::Mod2_OCP_Console_Storage_Classes.png[storageclasses]
 == Volume Snapshot Class
 
 By default, there is already a Volume Snapshot Class configured for AWS EBS volumes. +
-As Trident Protect relies on Trident to protect applications configured with FSxN volumes, you also need to create a Volume Snapshot Class that is linked to a Trident driver:
+In order to integrate the superior snapshot capabilties of the Ontap storage and allow Trident Protect to use snapshots as a step in the backup process, you also need to create a Volume Snapshot Class that is linked to the Trident driver:
 
 [.lines_space]
 [.console-input]
@@ -515,8 +524,8 @@ If you tried to create a VM from a template, you would not see one with the labe
 To reach your goal, you would need to clone the existing PVC, so that the VM disk ends up on the right storage class. +
 This process takes roughly 10 minutes. +
 
-In order for the VM creation process to be much faster (a few seconds), you first need to rebuild the source images. +
-To do so, you can just delete the existing datavolumes. OpenShift will automatically recreate what you need with the desired storage class.
+In order for the VM creation process to be much faster (a few seconds), you first need to rebuild the source images so they are stored on the more powerful Ontap storage. +
+To do so, you can just delete the existing datavolumes. OpenShift will automatically recreate what you need with the new default storage class you created earlier.
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
@@ -540,7 +549,7 @@ datavolume.cdi.kubevirt.io/rhel10-beta-da1c0cdc24da      Pending           N/A  
 datavolume.cdi.kubevirt.io/rhel8-833d0f124287                              N/A                   5s
 datavolume.cdi.kubevirt.io/rhel9-0c9204ba64c2                              N/A                   5s
 ----
-Give it a couple of minutes and run the same command again:
+Give it a couple of minutes and run the command again:
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
@@ -558,7 +567,7 @@ volumesnapshot.snapshot.storage.k8s.io/rhel8-833d0f124287            true       
 volumesnapshot.snapshot.storage.k8s.io/rhel9-0c9204ba64c2            true         rhel9-0c9204ba64c2                                    30Gi          csi-trident-vsc   snapcontent-48a33cbe-687e-4bcd-991b-9182ec0e12fa   23s            23s
 ----
 
-NOTE: Notice those volume snapshots were created against the Trident class ?
+NOTE: Notice that the datavolume resources are automatically cleaned up after the import is complete. Instead you now see volume snapshots that were created against the Trident class. Any subsequent VM creation from these templates/snapshots will now use NetApp cloning technology to give you extremely fast and efficient provisioning of VM disks.
 
 This optimization configuration also needs to be applied to the production environment. +
 You will also first need to log into that PROD cluster.
