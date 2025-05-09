@@ -1,13 +1,13 @@
 ---
 name: modules
-title: Sample Module Title
+title: OpenShift DR with NetApp ONTAP and Trident
 version: master
 nav:
   - modules/ROOT/nav.adoc
 
 asciidoc:
   attributes:
-    lab_name: "I'm the lab_name var"
+    lab_name: "Hands-on Disaster Recovery of OpenShift containers and VMs with Trident protect"
     release-version: master
     page-pagination: true
     my_var: "foo"
@@ -20,3 +20,5 @@ asciidoc:
       text: Red Hat
     - url: https://www.redhat.com/en/summit
       text: Summit
+    - url: https://docs.netapp.com/us-en/trident/
+      text: NetApp Trident documentation
