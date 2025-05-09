@@ -25,7 +25,7 @@ You can now close that Web Console.
 
 == Disaster Recovery Configuration
 
-Time to protect this very critical workloads!  +
+Time to protect this very critical workloads! Instead of a backup, we will setup a regular data replication, creating a warm standby on our DR cluster so we can quickly failover in case of a disaster. +
 We are going to use the CLI to perform that operation. +
 
 Make sure you are connected on the PROD cluster:
@@ -46,13 +46,12 @@ Setting the Disaster Recovery Plan is done in a few steps:
 
 [NOTE]
 ====
-* AMR are based on the NetApp SnapMirror technology to replicate persistent volumes.
-* Creating the AMR can be done with GitOps methodologies to automatically protect your application 
+* AMR are based on the NetApp SnapMirror technology to efficiently replicate persistent volumes directly at the storage level.
+* Creating the AMR can also be done with GitOps methodologies to automatically protect your application 
 ====
 
 [#creation]
 === Create a Trident Protect application for the *my-vm* namespace
-Make sure you are logged into the production cluster. +
 
 [.lines_space]
 [.console-input]
@@ -185,7 +184,7 @@ Switch context to the DR cluster.
 oc config use-context DR
 ----
 
-You can now create a new namespace which will host the mirror of the app, initiated by an AMR (_AppMirrorRelationship_) setup with Trident Protect.
+You can now create a new namespace which will host the mirror of the VM, initiated by an AMR (_AppMirrorRelationship_) setup with Trident Protect.
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
@@ -243,7 +242,7 @@ tridentctl-protect get amr -n vmdr
 |  vmamr1  |  lab-vault   |    lab-vault    | Established   | Establishing | 41s |       |
 +----------+--------------+-----------------+---------------+--------------+-----+-------+
 ----
-It will take a couple of minutes for the mirroring to be setup, or `Established`.
+It will take a couple of minutes for the mirroring to be setup, wait & repeat until the State is `Established`.
 [.lines_space]
 [.console-input]
 [source,bash,role=execute]
@@ -284,10 +283,10 @@ It will become `Read-Write` once you fail over the VM.
 ====
 
 [#failover]
-== Failover your application
+== Failover your VM
 
-Failover your application is pretty straight forward. You just need to _patch_ the AMR on the DR cluster. +
-This will break the mirror relationship, which in turn changes the volumes from `Read-Only` to `Read-Write`. From there, Trident Protect will redeploy all the protected objects on top of the PVC.
+Failover your VM is pretty straight forward. You just need to _patch_ the AMR on the DR cluster. +
+This will break the mirror relationship, which in turn changes the volumes from `Read-Only` to `Read-Write`. From there, Trident Protect will redeploy all the protected objects on top of the PVC so you get your VM back, up & running.
 
 [.lines_space]
 [.console-input]
@@ -339,12 +338,17 @@ persistentvolumeclaim/centos-stream9-boston   Bound    pvc-86c8b548-a9c5-4623-b6
 
 [NOTE]
 ====
+It might take a moment until the VM is started and then in Running state.
+====
+
+[NOTE]
+====
 If you needed to tailor the target VM, you could setup a PostFailover Hook with Trident Protect!
 ====
 
 == Check the result
 
-Connect to the OpenShift DR Console and navigate to the Virtual Machines menu. It might take a while for the Virtual Machine to fully boot. +
+Connect to the OpenShift DR Console and navigate to the Virtual Machines menu. +
 Log into the console and verify what our test file is there. Everything is failed over from the production cluster. 
 
 * Connect to the DR Console and navigate to the Virtual Machines menu:
@@ -382,7 +386,7 @@ Pretty awesome, no?
 == Resynchronize the mirror
 
 You have managed to create a VM, configure an asynchronous mirror relationship and test the DR failover. +
-Let's go back to an initial state and resyncrhonize the mirror relationship from PROD to DR +
+Let's go back to an initial state and resynchronize the mirror relationship from PROD to DR +
 This can be easily achieved by just updating the state of the AMR once again:
 
 [.lines_space]
@@ -429,7 +433,8 @@ NOTE: You may see a temporary warning message if you refresh too quickly. Do no 
 [IMPORTANT]
 ====
 Resynchronizing the mirror will stop and delete everything but the PVC on the DR site. When an AMR is established, the only object you can see in the DR namespce is the PVC. +
-This PVC is back on `ReadOnly` mode as it is the target of the mirror relationship.
+This PVC is back on `ReadOnly` mode as it is the target of the mirror relationship. +
+Everything is now ready for another DR failover to this cluster.
 ====
 
 You are now done with this module. Please proceed with the next one.
