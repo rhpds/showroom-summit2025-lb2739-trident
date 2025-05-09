@@ -66,7 +66,7 @@ trident-protect-controller-manager-7cdff78665-brjxk            2/2     Running  
 [NOTE]
 ====
 Another pod (`autosupportbundle`) should eventually appear. +
-Its role is to generate support data, and potentially send container logs to NetApp Support.
+Its role is to generate support data and send telemetry to NetApp Support.
 ==== 
 
 There are also a whole list of CRD installed with Trident Protect:
@@ -138,7 +138,7 @@ As we have only one bucket available, let's create a single AppVault.
 You first need to create two secrets:
 
 * one to host the bucket keys
-* one to host a password for the repository encryption (_optional_)
+* one to host a password for the repository encryption
 
 [.lines_space]
 [.console-input]
@@ -147,7 +147,7 @@ You first need to create two secrets:
 oc create secret generic -n trident-protect aws-s3-keys --from-literal=accessKeyID={aws_access_key_id} --from-literal=secretAccessKey={aws_secret_access_key}
 oc create secret generic -n trident-protect appvault-secret --from-literal=KOPIA_PASSWORD=mypassword
 ----
-CAUTION: Please *_do not_* change that appvault-secret password as the same bucket is used for both production and DR environments, and since the AppVault is already configured on the production environment
+CAUTION: Please *_do not_* change that appvault-secret password as the same bucket is used for both production and DR environments to allow for disaster recovery/failover. The AppVault is already configured with this password on the production environment
 
 [.console-output]
 [source,bash]
@@ -156,7 +156,7 @@ secret/aws-s3-keys created
 secret/appvault-secret created
 ----
 
-You are now ready to proceed with the AppVault creation, which is done in the _trident-protect_ namespace.
+You are now ready to proceed with the AppVault creation, which is done in the _trident-protect_ namespace. We will use the tridentctl-protect tool here, but you can achieve the same via declarative YAML manifests, ready to be included in your GitOps pipeline.
 [.lines_space]
 [.console-input]
 [source,bash,role=execute,subs="attributes"]
@@ -188,11 +188,11 @@ In a production environment, the administrator may also perform the following ta
 
 [TIP]
 ====
-In a real architecture where you want to implement a DR accross multiple regions, you may want to create a bucket & an AppVault per region.
+In a real world architecture where you want to implement a DR accross multiple regions, you may want to create a bucket & an AppVault per region.
 Trident Protect will take care of copying the application metadata between both buckets.
 ====
 
-As we are going to run the whole lab as an admin, those 3 tasks are not covered.
+As we are going to run the whole lab as an admin, the setup of fine-grained RBAC for backup & restore is not covered.
 For further details on access control, please refer to this https://docs.netapp.com/us-en/trident/trident-protect/manage-authorization-access-control.html[link,window="_blank"] icon:external-link[]
 
 You are now done with this module. Please proceed with the next one.
