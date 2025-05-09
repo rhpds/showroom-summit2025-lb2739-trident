@@ -2,18 +2,20 @@
 
 This lab guide provides a walkthrough on using NetApp Trident Protect to enable Distaster Recovery Plan for both your VMs and your containers between two environments.
 
-You will go through the steps to install the NetApp Trident Container Storage Interface (CSI) driver on a ROSA cluster, as well as how to configure it to provision volumes FSx for NetApp ONTAP file system.
+You will go through the steps to install the NetApp Trident Container Storage Interface (CSI) driver on a ROSA cluster, as well as how to configure it to provision volumes on a FSx for NetApp ONTAP file system.
 You will then proceed with the installation of Trident Protect, and its configuration to store data and metadata on an AWS S3 bucket.
 
-Last, you will learn how to backup and restore a container based application, as well as failover a VM on a secondary ROSA cluster. 
+Last, you will learn how to backup and restore a container based application, as well as failover a VM on a secondary ROSA cluster. This lab contains task that are handled by an OpenShift admin as well as activities typically perfomed by an OpenShift user. The different personas are noted throughout the lab guide.
 
-NOTE: Both Trident and Trident Protect are already installed on the primary cluster.
+NOTE: Both Trident and Trident Protect are already installed on the primary cluster. But you will go through the deployment process for both on the secondary cluster.
+
+Here is your agenda for today...
 
 . Module 1: Introduction & Overview
 . Module 2 (Admin persona): 
 .. Install and configure Trident in OpenShift (in secondary cluster)
 . Module 3 (User persona):
-.. Provision containers workloads
+.. Provision container workloads
 .. Provision VMs in OpenShift Virtualization
 . Module 4 (Admin persona):
 .. Install and configure Trident Protect in OpenShift (in secondary cluster)

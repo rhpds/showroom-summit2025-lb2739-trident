@@ -36,7 +36,7 @@ CURRENT   NAME   CLUSTER                                         AUTHINFO       
 *         PROD   api-prod-p4p6h-jtx8-p1-openshiftapps-com:6443   cluster-admin/api-prod-p4p6h-jtx8-p1-openshiftapps-com:6443   default
 ----
 
-You should already be logged into the PROD environment. +
+You should already be logged into the PROD environment, as indicated by the `*` in the first column of the output. +
 In case you need to switch back to it, here is the command to run:
 [.lines_space]
 [.console-input]
@@ -149,7 +149,7 @@ For this chapter, most tasks are going to be done in the OpenShift GUI.
 ** *user*: {rosa_openshift_admin_user}
 ** *password*: {rosa_openshift_admin_password}
 
-* Create a new project (`my-vm` in the example)
+* Navigate to Home --> Projects and create a new project by using the `Create Project` button on the top right. Name the project `my-vm`
 
 image::Mod3_OCP_Console_Project_Create.png[projectCreation]
 
@@ -166,7 +166,7 @@ image::Mod3_OCP_Console_VM_Centos_template.png[VMTemplate, 220, 220]
 [NOTE] 
 ====
 As you can see, the template you are selecting is labelled `Source available`. +
-This means that the corresponding image volume exists on this cluster with the default storage class condfigured for Virtual Machines.
+This means that the corresponding image volume exists on this cluster with the default storage class configured for Virtual Machines.
 ====
 
 * Leave all the default parameters
@@ -200,7 +200,7 @@ persistentvolumeclaim/centos-stream9-boston   Bound    pvc-3d6b8ffd-0483-44b5-9b
 ----
 As you can see, the creation was super fast. +
 
-NOTE: If the Template Image disk was on a different storage class, the process would have taken much longer (about 10 minutes), as it would first need to clone the data in a different volume.
+NOTE: If the Template Image disk was on a different storage class, the process would have taken much longer (about 10 minutes), as it would first need to copy the data into a different volume. Due to the NetApp ONTAP cloning technology being used in this setup, creation of the VM disk is always fast, independent of the template size. 
 
 * You can also see the status of the VM in the Console:
 
